@@ -817,45 +817,6 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                 {/* Main Editor Area */}
                 <div className="flex-1 flex flex-col overflow-hidden" style={{ backgroundColor: theme.editor }}>
 
-                    {/* Tab Bar */}
-                    <div className="h-[35px] flex items-center overflow-x-auto shrink-0" style={{ backgroundColor: theme.sidebar }}>
-                        {openTabs.map(tabId => {
-                            const Icon = getTabIcon(tabId);
-                            return (
-                                <div
-                                    key={tabId}
-                                    onClick={() => setActiveTab(tabId)}
-                                    className={`h-[35px] px-3 flex items-center gap-2 cursor-pointer border-r group min-w-[120px]
-                                        ${activeTab === tabId ? 'text-white' : 'text-[#969696] hover:text-white'}`}
-                                    style={{
-                                        backgroundColor: activeTab === tabId ? theme.editor : theme.sidebar,
-                                        borderColor: theme.border
-                                    }}
-                                >
-                                    <Icon className="w-4 h-4 shrink-0" />
-                                    <span className="text-[13px] truncate">{getTabName(tabId)}</span>
-                                    <X
-                                        onClick={(e) => handleCloseTab(tabId, e)}
-                                        className={`w-4 h-4 shrink-0 rounded hover:bg-[#3c3c3c] p-0.5
-                                            ${activeTab === tabId ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
-                                    />
-                                </div>
-                            );
-                        })}
-                    </div>
-
-                    {/* Breadcrumb */}
-                    {/* Breadcrumb */}
-                    <div className="h-[22px] flex items-center px-3 text-[12px] opacity-70 border-b shrink-0" style={{ backgroundColor: theme.editor, borderColor: theme.border, color: theme.text }}>
-                        <span>portfolio-vsc</span>
-                        <ChevronRight className="w-3 h-3 mx-1" />
-                        <span>
-                            {activeTab === 'resume.pdf' ? 'src' : activeTab.startsWith('project-') ? 'projects' : 'portfolio'}
-                        </span>
-                        <ChevronRight className="w-3 h-3 mx-1" />
-                        <span className="text-[#cccccc]">{getTabName(activeTab)}</span>
-                    </div>
-
                     {/* Editor Content */}
                     <div className="flex-1 overflow-y-auto">
                         <div className="p-6 max-w-5xl">

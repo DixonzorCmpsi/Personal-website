@@ -142,33 +142,6 @@ def query_hf_chat(user_message: str, system_prompt: str = DIXON_CONTEXT, model: 
         print(f"[HF Chat] Error with {model}: {e}")
         return None
 
-def fallback_response(msg: str) -> str:
-    """Smart fallback when HF unavailable"""
-    msg_lower = msg.lower()
-    
-    if any(w in msg_lower for w in ["experience", "work", "job", "role"]):
-        return "Dixon is currently an AI Application Specialist at Penn State Nittany AI Alliance, where he develops automated analytics dashboards using Azure, builds AI frameworks for RAG/CAG, and creates CI/CD pipelines. Previously he was a Research Assistant at the Human in Computing and Cognition Lab studying human-AI interaction and cognitive biases (2023-2025)."
-    
-    if any(w in msg_lower for w in ["education", "school", "university", "degree", "gpa"]):
-        return "Dixon graduated from The Pennsylvania State University, College of Engineering with a Bachelor of Science in Computer Science in May 2025."
-    
-    if any(w in msg_lower for w in ["skill", "tech", "language", "framework"]):
-        return "Dixon's skills include: Languages: JavaScript, Python, C, C++, MATLAB, SQL, Verilog. Frameworks: React, Node.js, Next.js, Flask, Tailwind. Tools: FastAPI, Docker, Azure, GCP, AWS, Postgres, MongoDB. He specializes in ML/AI and RAG systems."
-    
-    if any(w in msg_lower for w in ["project", "football", "fantasy"]):
-        return "Dixon built a Fantasy Football Prediction AI using Stacked XGBoost Ensemble to predict NFL player performance (2012-2024), plus Video Editing Tools including a silence truncator. Check out github.com/DixonzorCmpsi!"
-    
-    if any(w in msg_lower for w in ["hobby", "interest", "nfl", "gym", "youtube"]):
-        return "Dixon loves the NFL and makes YouTube videos about football analytics! He also enjoys the gym, video editing, and public speaking."
-    
-    if any(w in msg_lower for w in ["hello", "hi", "hey"]):
-        return "Hi there! I'm Dixon's AI assistant. I can tell you about his experience at Penn State AI Alliance, his education, skills (Python, React, Cloud, ML), projects (Football AI, Video Tools), or interests. What would you like to know?"
-    
-    if any(w in msg_lower for w in ["contact", "email", "phone", "linkedin"]):
-        return "You can reach Dixon at: Email: dixonzor@gmail.com | Phone: (267)-290-9734 | LinkedIn: linkedin.com/in/dixon-zor | GitHub: github.com/DixonzorCmpsi"
-    
-    return "Dixon Zor is a CS graduate from Penn State (May 2025), now an AI Application Specialist. He builds AI frameworks, automated systems, and loves NFL analytics. Ask about his experience, skills, projects, or education!"
-
 @app.get("/")
 async def root():
     return {
@@ -194,38 +167,25 @@ async def test_hf():
 
 @app.post("/api/chat")
 async def chat(request: ChatRequest):
-    msg_lower = request.message.lower()
-    
-    # If project_context is provided, use AI for dynamic summaries (skip keyword fallback)
-    if request.project_context:
-        context = DIXON_CONTEXT + f"\n\nAdditional context about the project being viewed: {request.project_context}"
-        for model in MODELS:
-            response = query_hf_chat(request.message, system_prompt=context, model=model)
-            if response and len(response) > 30:
-                return {"response": response, "model": model}
-        # If AI fails, generate a project-specific fallback
-        project_name = request.project_context.split("Project: ")[-1].split(".")[0] if "Project:" in request.project_context else "this project"
-        return {"response": f"{project_name} is a professional-level project showcasing technical excellence and practical application. Check out the README and GitHub repository for more details!", "model": "project-fallback"}
-    
-    # For regular chat queries, check for keyword matches - use reliable fallback
-    keywords = ["experience", "work", "job", "role", "education", "school", "university", 
-                "degree", "skill", "tech", "language", "framework", "project", "football", 
-                "fantasy", "hobby", "interest", "nfl", "gym", "youtube", "hello", "hi", 
-                "hey", "contact", "email", "phone", "linkedin", "resume", "about", "who"]
-    
-    if any(w in msg_lower for w in keywords):
-        return {"response": fallback_response(request.message), "model": "smart-fallback"}
-    
-    # For general queries, try HF models
+    """Chat endpoint - returns error if model fails"""
     context = DIXON_CONTEXT
     
+    # Add project context if provided
+    if request.project_context:
+        context = DIXON_CONTEXT + f"\n\nAdditional context about the project being viewed: {request.project_context}"
+    
+    # Try all available models
     for model in MODELS:
         response = query_hf_chat(request.message, system_prompt=context, model=model)
-        if response and len(response) > 30:  # Require longer response
+        if response and len(response) > 30:
             return {"response": response, "model": model}
     
-    # Final fallback
-    return {"response": fallback_response(request.message), "model": "fallback"}
+    # If all models fail, return error
+    return {
+        "error": "AI model unavailable",
+        "message": "Unable to connect to AI models. Please check HF_TOKEN or try again later.",
+        "hf_token_configured": bool(HF_TOKEN)
+    }
 
 if __name__ == "__main__":
     import uvicorn
