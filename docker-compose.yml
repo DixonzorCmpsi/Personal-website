@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # Next.js Frontend
+  frontend:
+    build:
+      context: ./roster-portfolio
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://backend:8000
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - portfolio-network
+
+  # FastAPI Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env.local
+    volumes:
+      # Mount project folders for the AI to read README files
+      - ./roster-portfolio/src/roster_config.json:/app/roster-portfolio/src/roster_config.json:ro
+    restart: unless-stopped
+    networks:
+      - portfolio-network
+
+networks:
+  portfolio-network:
+    driver: bridge

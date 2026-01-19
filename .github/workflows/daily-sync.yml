@@ -1,0 +1,26 @@
+name: Daily Project Sync
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # Run at 6:00 AM every day
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Fetch Pinned Projects
+        run: |
+          echo "Fetching pinned projects from GitHub GraphQL API..."
+          # This would typically involve a script that updates roster_config.json
+          # or triggers a rebuild of the Next.js site
+          # For now, we'll log the action
+          echo "Sync completed at $(date)"
+
+      - name: Rebuild Site (if needed)
+        run: |
+          # Trigger your deployment platform (e.g., Vercel, Azure) to rebuild
+          echo "Triggering site rebuild..."

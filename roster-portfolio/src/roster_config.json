@@ -1,0 +1,96 @@
+{
+  "github_username": "DixonzorCmpsi",
+  "formation": "DIAGRAM_SPREAD",
+  "quarterback": {
+    "label": "QB",
+    "x": 60,
+    "y": 20,
+    "linkedin_url": "https://www.linkedin.com/in/yourprofile",
+    "resume_url": "/resume.pdf"
+  },
+  "roster": [
+    {
+      "position": "RB",
+      "x": 40,
+      "y": 20,
+      "repo_name": "Portfolio-Website",
+      "display_name": "Portfolio Website",
+      "type": "repo",
+      "icon": "🌐"
+    },
+    {
+      "position": "WR_L",
+      "x": 10,
+      "y": 45,
+      "repo_name": "",
+      "display_name": "LinkedIn",
+      "type": "link",
+      "url": "https://linkedin.com/in/yourprofile",
+      "icon": "🔗"
+    },
+    {
+      "position": "SLOT_L1",
+      "x": 26,
+      "y": 45,
+      "repo_name": "Football-Ai",
+      "display_name": "Football AI",
+      "type": "repo",
+      "icon": "🏈"
+    },
+    {
+      "position": "C",
+      "x": 42,
+      "y": 45,
+      "repo_name": "LLM-Chatbot",
+      "display_name": "LLM Chatbot",
+      "type": "repo",
+      "icon": "🤖"
+    },
+    {
+      "position": "RG",
+      "x": 58,
+      "y": 45,
+      "repo_name": "Video-Truncator",
+      "display_name": "Video Truncator",
+      "type": "repo",
+      "icon": "✂️"
+    },
+    {
+      "position": "SLOT_R1",
+      "x": 74,
+      "y": 45,
+      "repo_name": "Video_downloader",
+      "display_name": "Video Downloader",
+      "type": "repo",
+      "icon": "📥"
+    },
+    {
+      "position": "WR_R",
+      "x": 90,
+      "y": 45,
+      "repo_name": "",
+      "display_name": "YouTube",
+      "type": "link",
+      "url": "https://youtube.com/@yourchannel",
+      "icon": "📺"
+    },
+    {
+      "position": "TE_L",
+      "x": 10,
+      "y": 70,
+      "repo_name": "interests-repo",
+      "display_name": "Interests",
+      "type": "repo",
+      "icon": "🎮"
+    },
+    {
+      "position": "TE_R",
+      "x": 90,
+      "y": 70,
+      "repo_name": "hobbies-repo",
+      "display_name": "Hobbies",
+      "type": "repo",
+      "icon": "🏀"
+    }
+  ]
+}
