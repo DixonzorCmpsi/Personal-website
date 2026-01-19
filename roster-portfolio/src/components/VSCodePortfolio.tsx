@@ -28,7 +28,9 @@ import {
     MoreHorizontal,
     Maximize2,
     PanelBottom,
-    Split
+    Split,
+    Sun,
+    Moon
 } from 'lucide-react';
 
 interface VSCodePortfolioProps {
@@ -588,78 +590,6 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
             style={{ backgroundColor: theme.bg, color: theme.text }}
         >
 
-            {/* Title Bar */}
-            <div
-                className="h-[30px] flex items-center justify-between px-2 select-none shrink-0"
-                style={{ backgroundColor: theme.titleBar }}
-            >
-                <div className="flex items-center gap-4">
-                    <div className="flex gap-2 ml-2">
-                        <div className="w-3 h-3 rounded-full bg-[#ff5f57] hover:brightness-90 cursor-pointer" />
-                        <div className="w-3 h-3 rounded-full bg-[#febc2e] hover:brightness-90 cursor-pointer" />
-                        <div className="w-3 h-3 rounded-full bg-[#28c840] hover:brightness-90 cursor-pointer" />
-                    </div>
-                </div>
-                <div className="text-[11px] opacity-80">
-                    {activeTab} — Dixon Zor — Visual Studio Code
-                </div>
-                <div className="w-20"></div>
-            </div>
-
-            {/* Menu Bar */}
-            <div
-                className="h-[35px] flex items-center px-3 gap-0 text-[13px] shrink-0 relative"
-                style={{ backgroundColor: theme.titleBar, borderBottom: `1px solid ${theme.border}` }}
-            >
-                {Object.keys(menuConfig).map((menu, menuIndex) => (
-                    <div key={menu} className="relative">
-                        <span
-                            className={`px-3 py-1 cursor-pointer transition-colors ${activeMenu === menu ? 'bg-[#094771]' : ''}`}
-                            style={{ backgroundColor: activeMenu === menu ? theme.selection : undefined }}
-                            onClick={(e) => { e.stopPropagation(); setActiveMenu(activeMenu === menu ? null : menu); }}
-                            onMouseEnter={(e) => {
-                                if (activeMenu && activeMenu !== menu) setActiveMenu(menu);
-                                if (!activeMenu) e.currentTarget.style.backgroundColor = theme.hover;
-                            }}
-                            onMouseLeave={(e) => {
-                                if (!activeMenu) e.currentTarget.style.backgroundColor = 'transparent';
-                            }}
-                        >
-                            {menu}
-                        </span>
-
-                        {/* Dropdown Menu */}
-                        {activeMenu === menu && (
-                            <div
-                                className="absolute top-full left-0 min-w-[220px] py-1 rounded-md shadow-xl z-50"
-                                style={{ backgroundColor: theme.sidebar, border: `1px solid ${theme.border}` }}
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                {menuConfig[menu].map((item, idx) => (
-                                    item.divider ? (
-                                        <div key={idx} className="my-1 border-t" style={{ borderColor: theme.border }} />
-                                    ) : (
-                                        <div
-                                            key={idx}
-                                            className="px-3 py-1.5 flex items-center justify-between cursor-pointer transition-colors"
-                                            style={{ color: theme.text }}
-                                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = theme.selection}
-                                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                                            onClick={() => { item.action?.(); setActiveMenu(null); }}
-                                        >
-                                            <span className="text-[13px]">{item.label}</span>
-                                            {item.shortcut && (
-                                                <span className="text-[11px] opacity-60 ml-8">{item.shortcut}</span>
-                                            )}
-                                        </div>
-                                    )
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                ))}
-            </div>
-
             <div className="flex-1 flex overflow-hidden">
 
                 {/* Activity Bar */}
@@ -709,18 +639,36 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                         {/* Theme Menu Popup */}
                         {showThemeMenu && (
                             <div
-                                className="absolute bottom-14 left-1 w-48 rounded-lg shadow-2xl z-50 overflow-hidden"
+                                className="absolute bottom-14 left-1 w-56 rounded-lg shadow-2xl z-50 overflow-hidden"
                                 style={{ backgroundColor: theme.sidebar, border: `1px solid ${theme.border}` }}
                             >
-                                <div className="p-2 text-[11px] uppercase tracking-wide opacity-60 border-b" style={{ borderColor: theme.border }}>
-                                    Color Theme
+                                <div className="p-3 border-b" style={{ borderColor: theme.border }}>
+                                    <button
+                                        onClick={() => {
+                                            setCurrentTheme(currentTheme === 'light' ? 'dark' : 'light');
+                                            setShowThemeMenu(false);
+                                        }}
+                                        className="w-full px-3 py-2 text-white text-[12px] rounded flex items-center justify-between transition-opacity hover:opacity-90"
+                                        style={{ backgroundColor: theme.accent }}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            {currentTheme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+                                            <span>{currentTheme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
+                                        </div>
+                                        <span className="text-[10px] opacity-70 underline">Toggle</span>
+                                    </button>
+                                </div>
+
+                                <div className="p-2 text-[11px] uppercase tracking-wide opacity-60 flex items-center justify-between" style={{ color: theme.text }}>
+                                    <span>Color Themes</span>
+                                    <Settings className="w-3 h-3" />
                                 </div>
                                 {(Object.keys(themes) as ThemeName[]).map((themeKey) => (
                                     <button
                                         key={themeKey}
                                         onClick={() => { setCurrentTheme(themeKey); setShowThemeMenu(false); }}
                                         className="w-full px-3 py-2 text-left text-[12px] flex items-center gap-2 transition-colors"
-                                        style={{ backgroundColor: currentTheme === themeKey ? theme.selection : 'transparent' }}
+                                        style={{ backgroundColor: currentTheme === themeKey ? theme.selection : 'transparent', color: theme.text }}
                                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = theme.hover}
                                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = currentTheme === themeKey ? theme.selection : 'transparent'}
                                     >
@@ -867,18 +815,22 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                 />
 
                 {/* Main Editor Area */}
-                <div className="flex-1 flex flex-col bg-[#1e1e1e] overflow-hidden">
+                <div className="flex-1 flex flex-col overflow-hidden" style={{ backgroundColor: theme.editor }}>
 
                     {/* Tab Bar */}
-                    <div className="h-[35px] bg-[#252526] flex items-center overflow-x-auto shrink-0">
+                    <div className="h-[35px] flex items-center overflow-x-auto shrink-0" style={{ backgroundColor: theme.sidebar }}>
                         {openTabs.map(tabId => {
                             const Icon = getTabIcon(tabId);
                             return (
                                 <div
                                     key={tabId}
                                     onClick={() => setActiveTab(tabId)}
-                                    className={`h-[35px] px-3 flex items-center gap-2 cursor-pointer border-r border-[#1e1e1e] group min-w-[120px]
-                                        ${activeTab === tabId ? 'bg-[#1e1e1e] text-white' : 'bg-[#2d2d2d] text-[#969696] hover:text-white'}`}
+                                    className={`h-[35px] px-3 flex items-center gap-2 cursor-pointer border-r group min-w-[120px]
+                                        ${activeTab === tabId ? 'text-white' : 'text-[#969696] hover:text-white'}`}
+                                    style={{
+                                        backgroundColor: activeTab === tabId ? theme.editor : theme.sidebar,
+                                        borderColor: theme.border
+                                    }}
                                 >
                                     <Icon className="w-4 h-4 shrink-0" />
                                     <span className="text-[13px] truncate">{getTabName(tabId)}</span>
@@ -894,7 +846,7 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
 
                     {/* Breadcrumb */}
                     {/* Breadcrumb */}
-                    <div className="h-[22px] bg-[#1e1e1e] flex items-center px-3 text-[12px] text-[#969696] border-b border-[#252526] shrink-0">
+                    <div className="h-[22px] flex items-center px-3 text-[12px] opacity-70 border-b shrink-0" style={{ backgroundColor: theme.editor, borderColor: theme.border, color: theme.text }}>
                         <span>portfolio-vsc</span>
                         <ChevronRight className="w-3 h-3 mx-1" />
                         <span>
@@ -938,8 +890,8 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                             />
                                         </div>
                                         <div>
-                                            <h1 className="text-[32px] font-light text-white mb-2">Welcome</h1>
-                                            <p className="text-[#969696]">Dixon Zor's Developer Portfolio</p>
+                                            <h1 className="text-[32px] font-light mb-2" style={{ color: theme.text }}>Welcome</h1>
+                                            <p className="opacity-60" style={{ color: theme.text }}>Dixon Zor's Developer Portfolio</p>
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
@@ -952,10 +904,13 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                             <div
                                                 key={item.id}
                                                 onClick={() => handleOpenFile(item.id)}
-                                                className="p-4 bg-[#252526] border border-[#3c3c3c] rounded hover:border-[#007acc] cursor-pointer transition-colors"
+                                                className="p-4 border rounded cursor-pointer transition-colors"
+                                                style={{ backgroundColor: theme.sidebar, borderColor: theme.border }}
+                                                onMouseEnter={(e) => e.currentTarget.style.borderColor = theme.accent}
+                                                onMouseLeave={(e) => e.currentTarget.style.borderColor = theme.border}
                                             >
-                                                <h3 className="text-white font-medium mb-1">{item.label}</h3>
-                                                <p className="text-[12px] text-[#969696]">{item.desc}</p>
+                                                <h3 className="font-medium mb-1" style={{ color: theme.text }}>{item.label}</h3>
+                                                <p className="text-[12px] opacity-60" style={{ color: theme.text }}>{item.desc}</p>
                                             </div>
                                         ))}
                                     </div>
@@ -993,7 +948,7 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                         </div>
                                     </div>
                                     {viewMode === 'code' ? (
-                                        <pre className="bg-[#1e1e1e] p-4 rounded border border-[#3c3c3c] text-[13px] font-mono text-[#ce9178] overflow-x-auto">
+                                        <pre className="p-4 rounded border text-[13px] font-mono text-[#ce9178] overflow-x-auto" style={{ backgroundColor: theme.editor, borderColor: theme.border }}>
                                             {JSON.stringify({ experiences }, null, 2)}
                                         </pre>
                                     ) : (
@@ -1047,7 +1002,7 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                             </div>
 
                                             {/* Degree Info */}
-                                            <div className="bg-[#1e1e1e] rounded-lg p-4 mb-4">
+                                            <div className="rounded-lg p-4 mb-4" style={{ backgroundColor: theme.editor }}>
                                                 <div className="text-[14px] text-white font-medium mb-1">
                                                     {edu.degree} in {edu.field}
                                                 </div>
@@ -1210,7 +1165,7 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                                     {project.stats?.images?.length > 0 && (
                                                         <div className="grid grid-cols-2 gap-3 mb-4">
                                                             {project.stats.images.map((img: string, i: number) => (
-                                                                <div key={i} className="relative aspect-video bg-[#1e1e1e] rounded overflow-hidden border border-[#3c3c3c] hover:border-[#007acc] transition-colors">
+                                                                <div key={i} className="relative aspect-video rounded overflow-hidden border transition-colors" style={{ backgroundColor: theme.editor, borderColor: theme.border }}>
                                                                     <img
                                                                         src={`/api${img}`}
                                                                         alt={`${project.display_name} screenshot ${i + 1}`}
@@ -1260,7 +1215,7 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                                 <span className="w-2 h-2 rounded-full bg-green-500"></span>
                                                 Project Assistant
                                             </div>
-                                            <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-[#1e1e1e]">
+                                            <div className="flex-1 overflow-y-auto p-3 space-y-3" style={{ backgroundColor: theme.editor }}>
                                                 {projectChatHistory.length === 0 && (
                                                     <div className="text-[#969696] text-center text-[12px] mt-10 px-4">
                                                         <p className="mb-2">👋 Hi! I'm your AI context assistant.</p>
@@ -1329,8 +1284,8 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                     {/* Terminal Panel */}
                     {isTerminalOpen && (
                         <div
-                            className="bg-[#1e1e1e] border-t border-[#3c3c3c] flex flex-col shrink-0"
-                            style={{ height: terminalHeight }}
+                            className="border-t flex flex-col shrink-0"
+                            style={{ height: terminalHeight, backgroundColor: theme.editor, borderColor: theme.border }}
                         >
                             <div className="h-[35px] bg-[#252526] flex items-center justify-between px-2 shrink-0">
                                 <div className="flex items-center gap-4">
