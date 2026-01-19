@@ -5,13 +5,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
+load_dotenv()
+load_dotenv(dotenv_path=".env.local")
 load_dotenv(dotenv_path="../.env.local")
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "https://deetalk.win",
+        "https://www.deetalk.win",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

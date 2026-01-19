@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { API_CHAT_ENDPOINT } from '@/config/api';
 import {
     FileText,
     FileCode2,
@@ -346,7 +347,7 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
         setIsLoading(true);
 
         try {
-            const res = await fetch('http://localhost:8000/api/chat', {
+            const res = await fetch(API_CHAT_ENDPOINT, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: userMsg })
@@ -404,7 +405,7 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
         // Get AI response for search
         setIsSearching(true);
         try {
-            const res = await fetch('http://localhost:8000/api/chat', {
+            const res = await fetch(API_CHAT_ENDPOINT, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: `Brief answer about: ${query}` })
@@ -498,7 +499,7 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
             const readmeSnippet = project.stats?.readme?.slice(0, 2000) || '';
             const projectDescription = project.stats?.description || project.display_name;
 
-            const res = await fetch('http://localhost:8000/api/chat', {
+            const res = await fetch(API_CHAT_ENDPOINT, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -1286,7 +1287,7 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                                     setProjectChatHistory(prev => [...prev, { role: 'user', content: msg }]);
 
                                                     try {
-                                                        const res = await fetch('http://localhost:8000/api/chat', {
+                                                        const res = await fetch(API_CHAT_ENDPOINT, {
                                                             method: 'POST',
                                                             headers: { 'Content-Type': 'application/json' },
                                                             body: JSON.stringify({

@@ -1,4 +1,5 @@
 import os
+print("🚀 BACKEND STARTING...")
 import json
 import requests
 from typing import List, Optional
@@ -7,21 +8,22 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
-# AI Imports
-from pinecone import Pinecone
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_community.llms import HuggingFaceEndpoint
-
-from langchain_community.vectorstores import Pinecone as LangChainPinecone
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+# Try to load env from various potential locations
+load_dotenv()
+load_dotenv(dotenv_path=".env.local")
 load_dotenv(dotenv_path="../.env.local")
 
 app = FastAPI()
 
-# Allow Next.js (port 3000) to talk to Python (port 8000)
+# Allow Next.js to talk to Python backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "https://deetalk.win",
+        "https://www.deetalk.win",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -32,32 +34,62 @@ GITHUB_GRAPHQL_API = "https://api.github.com/graphql"
 INDEX_NAME = os.getenv("PINECONE_INDEX_NAME")
 HF_TOKEN = os.getenv("HUGGINGFACEHUB_API_TOKEN")
 
-# Initialize Pinecone
-pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+# Global variables for models (lazy loaded)
+_embeddings = None
+_llm = None
 
-# 1. Embeddings (Runs locally, free)
-embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+def get_embeddings():
+    global _embeddings
+    if _embeddings is None:
+        print("📥 Importing Embeddings dependencies...")
+        from langchain_huggingface import HuggingFaceEmbeddings
+        print("📥 Initializing Embeddings...")
+        _embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+    return _embeddings
 
-# 2. LLM (Runs on Hugging Face Cloud, free tier)
-llm = HuggingFaceEndpoint(
-    repo_id="HuggingFaceH4/zephyr-7b-beta",
-    task="text-generation",
-    max_new_tokens=512,
-    top_k=30,
-    temperature=0.1,
-    huggingfacehub_api_token=HF_TOKEN
-)
+def get_llm():
+    global _llm
+    if _llm is None:
+        print("📥 Importing LLM dependencies...")
+        from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace
+        print("📥 Initializing LLM...")
+        llm = HuggingFaceEndpoint(
+            repo_id="mistralai/Mistral-7B-Instruct-v0.2",
+            task="conversational",
+            max_new_tokens=512,
+            huggingfacehub_api_token=HF_TOKEN
+        )
+        _llm = ChatHuggingFace(llm=llm)
+    return _llm
+
+def get_pinecone_store(index_name, embedding):
+    from langchain_pinecone import PineconeVectorStore
+    return PineconeVectorStore(index_name=index_name, embedding=embedding)
+
+@app.get("/")
+async def root():
+    return {"status": "online", "message": "Scout API is active"}
 
 # --- HELPER: GitHub Fetcher (Python Version) ---
 def fetch_github_data():
-    # Load roster config
-    try:
-        with open("../roster-portfolio/src/roster_config.json", "r", encoding='utf-8') as f:
-            config = json.load(f)
-    except FileNotFoundError:
-        # Fallback if running from different directory
-        with open("roster-portfolio/src/roster_config.json", "r", encoding='utf-8') as f:
-            config = json.load(f)
+    # Load roster config - try current dir and parent dir
+    config_paths = [
+        "roster-portfolio/src/roster_config.json",
+        "../roster-portfolio/src/roster_config.json",
+        "src/roster_config.json"
+    ]
+    
+    config = None
+    for path in config_paths:
+        try:
+            with open(path, "r", encoding='utf-8') as f:
+                config = json.load(f)
+                break
+        except FileNotFoundError:
+            continue
+            
+    if not config:
+        raise Exception(f"Could not find roster_config.json in any of {config_paths}")
 
     username = config['github_username']
     
@@ -107,6 +139,7 @@ async def ingest_data():
         metadatas.append({"source": "profile", "type": "bio"})
 
         # 2. Process Roster (Projects)
+        from langchain_text_splitters import RecursiveCharacterTextSplitter
         splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
         
         for player in roster:
@@ -128,9 +161,10 @@ async def ingest_data():
         print(f"🏈 Embedding {len(texts)} plays into the playbook...")
         
         # Upsert to Pinecone via LangChain
-        LangChainPinecone.from_texts(
+        from langchain_pinecone import PineconeVectorStore
+        PineconeVectorStore.from_texts(
             texts=texts, 
-            embedding=embeddings, 
+            embedding=get_embeddings(), 
             index_name=INDEX_NAME,
             metadatas=metadatas
         )
@@ -149,14 +183,11 @@ class ChatRequest(BaseModel):
 async def chat(request: ChatRequest):
     try:
         # Connect to existing index
-        vectorstore = LangChainPinecone.from_existing_index(
-            index_name=INDEX_NAME, 
-            embedding=embeddings
-        )
+        vectorstore = get_pinecone_store(INDEX_NAME, get_embeddings())
         
         # Retrieve relevant documents
         retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
-        docs = retriever.get_relevant_documents(request.message)
+        docs = retriever.invoke(request.message)
         
         # Format context from retrieved documents
         context = "\n\n".join([doc.page_content for doc in docs])
@@ -174,11 +205,16 @@ async def chat(request: ChatRequest):
         """
         
         # Get response from LLM
-        response = llm.invoke(prompt)
+        response = get_llm().invoke(prompt)
         
-        return {"response": response}
+        # chat model returns a message object, so we need .content
+        res_text = response.content if hasattr(response, 'content') else str(response)
+        
+        return {"response": res_text}
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 "use client";
 import { useState } from 'react';
+import { API_CHAT_ENDPOINT } from '@/config/api';
 
 export default function GlobalChat() {
     const [input, setInput] = useState("");
@@ -17,7 +18,7 @@ export default function GlobalChat() {
         setIsLoading(true);
 
         try {
-            const res = await fetch('http://localhost:8000/api/chat', {
+            const res = await fetch(API_CHAT_ENDPOINT, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: input })

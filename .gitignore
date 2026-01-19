@@ -118,3 +118,4 @@ output.txt
 *.wmv
 *.flv
 *.webm
+.env

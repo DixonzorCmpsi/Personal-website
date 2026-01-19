@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { X, Github, ExternalLink, Send, Bot, User, Code, Star, MessageSquare } from 'lucide-react';
 import { Project } from './types';
 import Link from 'next/link';
+import { API_CHAT_ENDPOINT } from '@/config/api';
 
 interface ProjectModalProps {
     project: Project;
@@ -44,7 +45,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) 
             
             Answer:`;
 
-            const res = await fetch('http://localhost:8000/api/chat', {
+            const res = await fetch(API_CHAT_ENDPOINT, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: prompt })
@@ -52,7 +53,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) 
             const data = await res.json();
             setChatHistory([...newHistory, { role: 'assistant', content: data.response }]);
         } catch (err) {
-            setChatHistory([...newHistory, { role: 'assistant', content: "Error connecting to AI backend. Make sure Dixon's server is running at :8000" }]);
+            setChatHistory([...newHistory, { role: 'assistant', content: "Error connecting to AI backend. Please try again later." }]);
         } finally {
             setIsLoading(false);
         }
@@ -161,8 +162,8 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) 
                         {chatHistory.map((msg, idx) => (
                             <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fadeIn`}>
                                 <div className={`max-w-[85%] p-3 rounded-2xl text-xs leading-relaxed ${msg.role === 'user'
-                                        ? 'bg-[#007acc] text-white rounded-tr-none shadow-md'
-                                        : 'bg-[#2d2d30] text-[#cccccc] rounded-tl-none border border-[#3c3c3c]'
+                                    ? 'bg-[#007acc] text-white rounded-tr-none shadow-md'
+                                    : 'bg-[#2d2d30] text-[#cccccc] rounded-tl-none border border-[#3c3c3c]'
                                     }`}>
                                     {msg.content}
                                 </div>
