@@ -1,4 +1,4 @@
-name: Deploy React site to Pages
+name: Deploy Website to Pages
 
 on:
   push:
@@ -17,45 +17,56 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./roster-portfolio
-
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # 1. Setup Node (Point to the lock file in your subfolder)
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: 'npm'
+          # Tells the cache exactly where your lock file is
           cache-dependency-path: ./roster-portfolio/package-lock.json
 
+      # 2. Install Dependencies (Run inside the subfolder)
       - name: Install dependencies
+        working-directory: ./roster-portfolio
         run: npm ci
 
+      # 3. Build the Project (Run inside the subfolder)
       - name: Build
-        # This creates the 'build' folder
+        working-directory: ./roster-portfolio
         run: npm run build
 
-      # --- DIAGNOSTIC STEP ---
-      - name: 🔍 Debug - List Files
-        if: always() # Run even if build fails
+      # 4. SMART SEARCH: Find the build folder automatically
+      # This handles cases where the folder is named 'dist', 'build', or 'out'
+      - name: Detect Build Folder
+        id: detect
         run: |
-          echo "Listing root directory:"
-          ls -F
-          echo "\nListing build output:"
-          ls -F build/ || echo "Build folder not found at ./roster-portfolio/build"
-          ls -F out/ || echo "Out folder not found at ./roster-portfolio/out"
-      # -----------------------
+          echo "🔍 Searching for build output..."
+          
+          # Look for a folder named 'build', 'dist', or 'out' inside 'roster-portfolio'
+          # that contains an 'index.html' file.
+          BUILD_PATH=$(find ./roster-portfolio -type d \( -name "build" -o -name "dist" -o -name "out" \) -not -path "*/node_modules/*" -exec test -e "{}/index.html" \; -print | head -n 1)
+          
+          if [ -z "$BUILD_PATH" ]; then
+            echo "❌ Error: Could not find a valid build folder (build, dist, or out) containing index.html!"
+            echo "Here is the file structure of roster-portfolio:"
+            ls -R ./roster-portfolio
+            exit 1
+          fi
+          
+          echo "✅ Found build artifact at: $BUILD_PATH"
+          echo "path=$BUILD_PATH" >> $GITHUB_OUTPUT
 
+      # 5. Upload the folder we just found
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # We are betting your folder is named 'build'. 
-          # If the debug step above shows 'out', change this to './roster-portfolio/out'
-          path: ./roster-portfolio/build
+          path: ${{ steps.detect.outputs.path }}
 
   deploy:
     environment:
