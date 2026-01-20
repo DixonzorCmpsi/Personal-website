@@ -39,7 +39,7 @@ export async function GET(
         }
 
         console.log(`[Media API] Found at: ${absolutePath}`);
-        const file = fs.readFileSync(absolutePath);
+        
         const ext = path.extname(absolutePath).toLowerCase();
 
         // Determine content type
@@ -55,11 +55,50 @@ export async function GET(
         };
 
         const contentType = contentTypes[ext] || 'application/octet-stream';
-        console.log(`[Media API] Serving ${filePath} as ${contentType}`);
+        const stat = fs.statSync(absolutePath);
+        const fileSize = stat.size;
+
+        // Handle range requests for video streaming
+        const range = request.headers.get('range');
+        
+        if (range && (ext === '.mp4' || ext === '.webm' || ext === '.mov')) {
+            const parts = range.replace(/bytes=/, '').split('-');
+            const start = parseInt(parts[0], 10);
+            const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+            const chunkSize = end - start + 1;
+
+            console.log(`[Media API] Range request: ${start}-${end}/${fileSize}`);
+
+            const fileStream = fs.createReadStream(absolutePath, { start, end });
+            const chunks: Buffer[] = [];
+            
+            for await (const chunk of fileStream) {
+                chunks.push(chunk as Buffer);
+            }
+            
+            const buffer = Buffer.concat(chunks);
+
+            return new NextResponse(buffer, {
+                status: 206,
+                headers: {
+                    'Content-Type': contentType,
+                    'Content-Length': chunkSize.toString(),
+                    'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+                    'Accept-Ranges': 'bytes',
+                    'Cache-Control': 'public, max-age=31536000',
+                },
+            });
+        }
+
+        // For non-range requests or images, return the full file
+        console.log(`[Media API] Serving ${filePath} as ${contentType} (${fileSize} bytes)`);
+        const file = fs.readFileSync(absolutePath);
 
         return new NextResponse(file, {
             headers: {
                 'Content-Type': contentType,
+                'Content-Length': fileSize.toString(),
+                'Accept-Ranges': 'bytes',
                 'Cache-Control': 'public, max-age=31536000',
             },
         });
