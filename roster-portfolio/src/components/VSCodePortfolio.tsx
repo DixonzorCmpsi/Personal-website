@@ -109,7 +109,7 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
             setIsMobile(mobile);
             if (mobile) {
                 setShowMobileSidebar(false);
-                setIsTerminalOpen(false);
+                // Don't auto-close terminal on mobile - let user control it
             }
         };
         checkMobile();
@@ -1481,7 +1481,7 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                     {isTerminalOpen && (
                         <div
                             className="border-t flex flex-col shrink-0"
-                            style={{ height: isMobile ? '250px' : terminalHeight, backgroundColor: theme.editor, borderColor: theme.border }}
+                            style={{ height: isMobile ? '45vh' : terminalHeight, backgroundColor: theme.editor, borderColor: theme.border }}
                         >
                             <div className="h-[30px] md:h-[35px] bg-[#252526] flex items-center justify-between px-2 shrink-0">
                                 <div className="flex items-center gap-2 md:gap-4">
