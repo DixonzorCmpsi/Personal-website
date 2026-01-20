@@ -1228,10 +1228,15 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                                                         controls
                                                                         className="w-full max-h-[400px]"
                                                                         preload="metadata"
+                                                                        poster={project.stats?.images?.[0] ? `/api${project.stats.images[0]}` : undefined}
+                                                                        playsInline
                                                                     >
                                                                         <source src={`/api${vid}`} type="video/mp4" />
                                                                         Your browser does not support the video tag.
                                                                     </video>
+                                                                    <div className="p-2 text-[11px] text-[#969696] bg-[#252526]">
+                                                                        📹 {vid.split('/').pop()?.replace(/%20/g, ' ')}
+                                                                    </div>
                                                                 </div>
                                                             ))}
                                                         </div>
