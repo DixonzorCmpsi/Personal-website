@@ -133,7 +133,7 @@ export async function getRosterStats() {
         Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
       },
       body: JSON.stringify({ query }),
-      next: { revalidate: 3600 },
+      next: { revalidate: 60 },
     });
     json = await response.json();
     
