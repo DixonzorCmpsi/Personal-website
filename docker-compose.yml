@@ -9,6 +9,7 @@ services:
     environment:
       - NODE_ENV=production
       - NEXT_PUBLIC_API_URL=http://backend:8000
+      - REVALIDATE_TOKEN=refresh-portfolio-secret
     env_file:
       - .env.local
     volumes:
