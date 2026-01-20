@@ -6,8 +6,8 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Copy package files
-COPY package.json package-lock.json* ./
+# Copy package files from roster-portfolio
+COPY roster-portfolio/package.json roster-portfolio/package-lock.json* ./
 
 # Install dependencies
 RUN npm ci
@@ -16,7 +16,18 @@ RUN npm ci
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY roster-portfolio/ ./
+
+# Copy project folders for build-time media detection (use shell form for spaces)
+RUN mkdir -p "../Football AI" "../LLM Chatbot" "../Video Downloader" "../Video Truncator" "../Portfolio Website"
+COPY ["Football AI", "../Football AI/"]
+COPY ["LLM Chatbot", "../LLM Chatbot/"]
+COPY ["Video Downloader", "../Video Downloader/"]
+COPY ["Video Truncator", "../Video Truncator/"]
+COPY ["Portfolio Website", "../Portfolio Website/"]
+
+# Copy env file for build
+COPY .env.local .env.local
 
 # Build the application
 RUN npm run build

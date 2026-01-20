@@ -6,7 +6,26 @@ const GITHUB_GRAPHQL_API = "https://api.github.com/graphql";
 
 // Function to get project media files and demo link from local folders
 function getProjectMedia(projectName: string): { images: string[], videos: string[], demoLink?: string } {
-  const projectDir = path.join(process.cwd(), '..', projectName);
+  // Try multiple possible base paths (for local dev and Docker)
+  const possibleBasePaths = [
+    path.join(process.cwd(), '..', projectName),  // Local dev
+    path.join(process.cwd(), projectName),         // Docker with volume mount
+  ];
+
+  let projectDir: string | null = null;
+  for (const basePath of possibleBasePaths) {
+    if (fs.existsSync(basePath)) {
+      projectDir = basePath;
+      break;
+    }
+  }
+
+  if (!projectDir) {
+    console.log(`[getProjectMedia] Project folder not found for: ${projectName}`);
+    console.log(`[getProjectMedia] Tried paths:`, possibleBasePaths);
+    return { images: [], videos: [], demoLink: undefined };
+  }
+
   const imagesDir = path.join(projectDir, 'images');
   const videoDir = path.join(projectDir, 'video');
   const linkFile = path.join(projectDir, 'link', 'link.json');

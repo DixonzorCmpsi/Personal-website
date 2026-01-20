@@ -12,16 +12,33 @@ export async function GET(
 
         // Decode each segment to handle spaces and special characters properly
         const filePath = resolvedParams.path.map(p => decodeURIComponent(p)).join('/');
-        const absolutePath = path.join(process.cwd(), '..', filePath);
+        
+        // Try multiple possible base paths (for local dev and Docker)
+        const possiblePaths = [
+            path.join(process.cwd(), '..', filePath),  // Local dev: /app/../Football AI/...
+            path.join(process.cwd(), filePath),         // Docker with volume mount: /app/Football AI/...
+            path.join('/', filePath),                   // Absolute path fallback
+        ];
 
         console.log(`[Media API] Requested path: ${filePath}`);
-        console.log(`[Media API] Absolute path: ${absolutePath}`);
+        console.log(`[Media API] CWD: ${process.cwd()}`);
+        console.log(`[Media API] Trying paths:`, possiblePaths);
 
-        if (!fs.existsSync(absolutePath)) {
-            console.log(`[Media API] File not found: ${absolutePath}`);
+        let absolutePath: string | null = null;
+        for (const tryPath of possiblePaths) {
+            console.log(`[Media API] Checking: ${tryPath} - exists: ${fs.existsSync(tryPath)}`);
+            if (fs.existsSync(tryPath)) {
+                absolutePath = tryPath;
+                break;
+            }
+        }
+
+        if (!absolutePath) {
+            console.log(`[Media API] File not found in any path`);
             return new NextResponse('File not found', { status: 404 });
         }
 
+        console.log(`[Media API] Found at: ${absolutePath}`);
         const file = fs.readFileSync(absolutePath);
         const ext = path.extname(absolutePath).toLowerCase();
 
