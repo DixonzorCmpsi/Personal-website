@@ -965,7 +965,7 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                     <div className="flex-1 overflow-y-auto">
                         <div className="p-4 md:p-6 max-w-5xl mx-auto">
                             {activeTab === 'resume.pdf' && (
-                                <div className="flex flex-col h-full">
+                                <div className="flex flex-col">
                                     {/* Download button at top */}
                                     <div className="flex justify-end mb-3">
                                         <a 
@@ -978,10 +978,11 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                         </a>
                                     </div>
                                     {/* Embedded PDF viewer */}
-                                    <div className="flex-1 min-h-[500px] md:min-h-[700px] rounded-lg overflow-hidden border" style={{ borderColor: theme.border }}>
+                                    <div className="rounded-lg overflow-hidden border" style={{ borderColor: theme.border }}>
                                         <iframe
                                             src="/resume.pdf"
-                                            className="w-full h-full"
+                                            className="w-full"
+                                            style={{ height: 'calc(100vh - 180px)', minHeight: '600px' }}
                                             title="Dixon's Resume"
                                         />
                                     </div>
