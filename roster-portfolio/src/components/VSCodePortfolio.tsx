@@ -30,7 +30,10 @@ import {
     PanelBottom,
     Split,
     Sun,
-    Moon
+    Moon,
+    Menu,
+    PanelLeft,
+    MessageSquare
 } from 'lucide-react';
 
 interface VSCodePortfolioProps {
@@ -94,6 +97,25 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
     const [terminalHeight, setTerminalHeight] = useState(200);
     const [isResizingSidebar, setIsResizingSidebar] = useState(false);
     const [isResizingTerminal, setIsResizingTerminal] = useState(false);
+
+    // Mobile responsive state
+    const [isMobile, setIsMobile] = useState(false);
+    const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+
+    // Detect screen size
+    useEffect(() => {
+        const checkMobile = () => {
+            const mobile = window.innerWidth < 768;
+            setIsMobile(mobile);
+            if (mobile) {
+                setShowMobileSidebar(false);
+                setIsTerminalOpen(false);
+            }
+        };
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     // AI Project Summary state
     const [projectAiSummary, setProjectAiSummary] = useState<string>('');
@@ -586,14 +608,48 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
 
     return (
         <div
-            className="h-screen w-screen flex flex-col font-[-apple-system,BlinkMacSystemFont,'Segoe_UI',Roboto,Oxygen,Ubuntu,sans-serif] text-[13px] overflow-hidden"
+            className="h-screen w-screen flex flex-col font-[-apple-system,BlinkMacSystemFont,'Segoe_UI',Roboto,Oxygen,Ubuntu,sans-serif] text-[13px] md:text-[13px] text-[12px] overflow-hidden"
             style={{ backgroundColor: theme.bg, color: theme.text }}
         >
+            {/* Mobile Header */}
+            {isMobile && (
+                <div 
+                    className="h-12 flex items-center justify-between px-3 shrink-0 border-b"
+                    style={{ backgroundColor: theme.titleBar, borderColor: theme.border }}
+                >
+                    <button
+                        onClick={() => setShowMobileSidebar(!showMobileSidebar)}
+                        className="p-2 rounded"
+                        style={{ color: theme.text }}
+                    >
+                        <Menu className="w-5 h-5" />
+                    </button>
+                    <span className="text-sm font-medium truncate max-w-[150px]">{getTabName(activeTab)}</span>
+                    <div className="flex items-center gap-1">
+                        <button
+                            onClick={() => setIsTerminalOpen(!isTerminalOpen)}
+                            className={`p-2 rounded ${isTerminalOpen ? 'bg-[#007acc]/30' : ''}`}
+                            style={{ color: isTerminalOpen ? '#007acc' : theme.text }}
+                            title="AI Chat / Terminal"
+                        >
+                            <MessageSquare className="w-5 h-5" />
+                        </button>
+                    </div>
+                </div>
+            )}
 
-            <div className="flex-1 flex overflow-hidden">
+            <div className="flex-1 flex overflow-hidden relative">
 
-                {/* Activity Bar */}
-                <div className={`w-[48px] ${isDarkTheme ? 'bg-[#333333]' : 'bg-[#e0e0e0]'} flex flex-col items-center py-1 shrink-0 border-r ${theme.border}`}>
+                {/* Mobile Sidebar Overlay */}
+                {isMobile && showMobileSidebar && (
+                    <div 
+                        className="absolute inset-0 bg-black/50 z-40"
+                        onClick={() => setShowMobileSidebar(false)}
+                    />
+                )}
+
+                {/* Activity Bar - Hidden on mobile */}
+                <div className={`${isMobile ? 'hidden' : 'flex'} w-[48px] ${isDarkTheme ? 'bg-[#333333]' : 'bg-[#e0e0e0]'} flex-col items-center py-1 shrink-0 border-r ${theme.border}`}>
                     {[
                         { id: 'explorer', icon: FileCode2, label: 'Explorer' },
                         { id: 'search', icon: Search, label: 'Search' },
@@ -688,13 +744,53 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
 
                 {/* Sidebar */}
                 <div
-                    className={`flex flex-col shrink-0 border-r ${isDarkTheme ? 'border-[#1e1e1e]' : 'border-[#cccccc]'}`}
-                    style={{ width: sidebarWidth, backgroundColor: theme.sidebar }}
+                    className={`flex flex-col shrink-0 border-r ${isDarkTheme ? 'border-[#1e1e1e]' : 'border-[#cccccc]'} ${
+                        isMobile 
+                            ? `absolute left-0 top-0 bottom-0 z-50 transition-transform duration-300 ${showMobileSidebar ? 'translate-x-0' : '-translate-x-full'}`
+                            : ''
+                    }`}
+                    style={{ 
+                        width: isMobile ? 280 : sidebarWidth, 
+                        backgroundColor: theme.sidebar,
+                        ...(isMobile && { boxShadow: showMobileSidebar ? '4px 0 20px rgba(0,0,0,0.3)' : 'none' })
+                    }}
                 >
                     <div className="h-[35px] flex items-center justify-between px-4 text-[11px] uppercase tracking-wide text-[#bbbbbb]">
                         <span>{activeSidebar === 'explorer' ? 'Explorer' : activeSidebar === 'search' ? 'Search' : activeSidebar === 'git' ? 'Source Control' : 'Extensions'}</span>
-                        <MoreHorizontal className="w-4 h-4 cursor-pointer hover:text-white" />
+                        {isMobile ? (
+                            <button onClick={() => setShowMobileSidebar(false)}>
+                                <X className="w-4 h-4 cursor-pointer hover:text-white" />
+                            </button>
+                        ) : (
+                            <MoreHorizontal className="w-4 h-4 cursor-pointer hover:text-white" />
+                        )}
                     </div>
+                    {/* Mobile Sidebar Navigation */}
+                    {isMobile && (
+                        <div className="flex items-center gap-1 px-2 py-2 border-b" style={{ borderColor: theme.border }}>
+                            {[
+                                { id: 'explorer', icon: FileCode2, label: 'Files' },
+                                { id: 'search', icon: Search, label: 'Search' },
+                                { id: 'git', icon: GitBranch, label: 'Git' },
+                                { id: 'extensions', icon: Package, label: 'Skills' },
+                            ].map(item => (
+                                <button
+                                    key={item.id}
+                                    onClick={() => setActiveSidebar(item.id)}
+                                    className={`flex-1 p-2 rounded text-[10px] flex flex-col items-center gap-1 ${
+                                        activeSidebar === item.id ? 'bg-opacity-20' : ''
+                                    }`}
+                                    style={{ 
+                                        backgroundColor: activeSidebar === item.id ? theme.accent + '30' : 'transparent',
+                                        color: activeSidebar === item.id ? theme.accent : theme.text 
+                                    }}
+                                >
+                                    <item.icon className="w-4 h-4" />
+                                    <span>{item.label}</span>
+                                </button>
+                            ))}
+                        </div>
+                    )}
                     <div className="flex-1 overflow-y-auto text-[13px]">
                         {/* Explorer View */}
                         {activeSidebar === 'explorer' && renderTree(folders)}
@@ -808,33 +904,86 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                     </div>
                 </div>
 
-                {/* Sidebar Resize Handle */}
-                <div
-                    className={`w-1 cursor-ew-resize hover:bg-[#007acc] transition-colors ${isResizingSidebar ? 'bg-[#007acc]' : 'bg-transparent'}`}
-                    onMouseDown={() => setIsResizingSidebar(true)}
-                />
+                {/* Sidebar Resize Handle - Hidden on mobile */}
+                {!isMobile && (
+                    <div
+                        className={`w-1 cursor-ew-resize hover:bg-[#007acc] transition-colors ${isResizingSidebar ? 'bg-[#007acc]' : 'bg-transparent'}`}
+                        onMouseDown={() => setIsResizingSidebar(true)}
+                    />
+                )}
 
                 {/* Main Editor Area */}
                 <div className="flex-1 flex flex-col overflow-hidden" style={{ backgroundColor: theme.editor }}>
 
+                    {/* Tab Bar - Hidden on mobile (using header instead) */}
+                    {!isMobile && (
+                        <div 
+                            className="flex items-center h-[35px] shrink-0 overflow-x-auto"
+                            style={{ backgroundColor: theme.titleBar, borderBottom: `1px solid ${theme.border}` }}
+                        >
+                            {openTabs.map((tabId) => {
+                                const TabIcon = getTabIcon(tabId);
+                                const isActive = activeTab === tabId;
+                                return (
+                                <div
+                                    key={tabId}
+                                    onClick={() => setActiveTab(tabId)}
+                                    className={`flex items-center gap-2 px-3 h-full cursor-pointer group shrink-0 border-r`}
+                                    style={{
+                                        backgroundColor: isActive ? theme.editor : 'transparent',
+                                        borderColor: theme.border,
+                                        borderTop: isActive ? `2px solid ${theme.accent}` : '2px solid transparent',
+                                    }}
+                                >
+                                    <TabIcon className="w-4 h-4 shrink-0" style={{ color: theme.accent }} />
+                                    <span 
+                                        className="text-[12px] max-w-[120px] truncate"
+                                        style={{ color: isActive ? theme.text : (isDarkTheme ? '#969696' : '#666666') }}
+                                    >
+                                        {getTabName(tabId)}
+                                    </span>
+                                    {openTabs.length > 1 && (
+                                        <button
+                                            onClick={(e) => handleCloseTab(tabId, e)}
+                                            className="ml-1 p-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                                            style={{ 
+                                                backgroundColor: 'transparent',
+                                            }}
+                                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = theme.hover}
+                                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                                        >
+                                            <X className="w-3.5 h-3.5" style={{ color: isDarkTheme ? '#969696' : '#666666' }} />
+                                        </button>
+                                    )}
+                                </div>
+                            );
+                        })}
+                        </div>
+                    )}
+
                     {/* Editor Content */}
                     <div className="flex-1 overflow-y-auto">
-                        <div className="p-6 max-w-5xl">
+                        <div className="p-4 md:p-6 max-w-5xl mx-auto">
                             {activeTab === 'resume.pdf' && (
-                                <div className="flex flex-col items-center justify-center py-20 text-[#969696] text-center">
-                                    <FileText className="w-16 h-16 mb-4 text-[#007acc] opacity-50" />
-                                    <h2 className="text-white text-[20px] font-light mb-2">resume.pdf</h2>
-                                    <p className="text-[14px] mb-6 max-w-md">
-                                        Click below to view Dixon's resume in an overlay.
-                                    </p>
-                                    <div className="flex gap-3">
-                                        <button
-                                            onClick={() => setShowResumeModal(true)}
-                                            className="px-6 py-2 bg-[#007acc] hover:bg-[#005a9e] text-white rounded text-[13px] transition-colors"
+                                <div className="flex flex-col h-full">
+                                    {/* Download button at top */}
+                                    <div className="flex justify-end mb-3">
+                                        <a 
+                                            href="/resume.pdf" 
+                                            download 
+                                            className="px-4 py-2 bg-[#007acc] hover:bg-[#005a9e] text-white rounded text-[12px] md:text-[13px] transition-colors flex items-center gap-2"
                                         >
-                                            View Resume
-                                        </button>
-                                        <a href="/resume.pdf" download className="px-6 py-2 bg-[#3c3c3c] hover:bg-[#4a4a4a] text-white rounded text-[13px] transition-colors">Download</a>
+                                            <FileText className="w-4 h-4" />
+                                            Download PDF
+                                        </a>
+                                    </div>
+                                    {/* Embedded PDF viewer */}
+                                    <div className="flex-1 min-h-[500px] md:min-h-[700px] rounded-lg overflow-hidden border" style={{ borderColor: theme.border }}>
+                                        <iframe
+                                            src="/resume.pdf"
+                                            className="w-full h-full"
+                                            title="Dixon's Resume"
+                                        />
                                     </div>
                                 </div>
                             )}
@@ -851,11 +1000,11 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                             />
                                         </div>
                                         <div>
-                                            <h1 className="text-[32px] font-light mb-2" style={{ color: theme.text }}>Welcome</h1>
-                                            <p className="opacity-60" style={{ color: theme.text }}>Dixon Zor's Developer Portfolio</p>
+                                            <h1 className="text-[24px] md:text-[32px] font-light mb-2" style={{ color: theme.text }}>Welcome</h1>
+                                            <p className="opacity-60 text-[13px] md:text-[15px]" style={{ color: theme.text }}>Dixon Zor's Developer Portfolio</p>
                                         </div>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                                         {[
                                             { id: 'resume.pdf', label: 'Resume', desc: 'Current resume in PDF' },
                                             { id: 'experience.json', label: 'Experience', desc: 'View work history' },
@@ -864,14 +1013,14 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                         ].map(item => (
                                             <div
                                                 key={item.id}
-                                                onClick={() => handleOpenFile(item.id)}
-                                                className="p-4 border rounded cursor-pointer transition-colors"
+                                                onClick={() => { handleOpenFile(item.id); if (isMobile) setShowMobileSidebar(false); }}
+                                                className="p-3 md:p-4 border rounded cursor-pointer transition-colors"
                                                 style={{ backgroundColor: theme.sidebar, borderColor: theme.border }}
                                                 onMouseEnter={(e) => e.currentTarget.style.borderColor = theme.accent}
                                                 onMouseLeave={(e) => e.currentTarget.style.borderColor = theme.border}
                                             >
-                                                <h3 className="font-medium mb-1" style={{ color: theme.text }}>{item.label}</h3>
-                                                <p className="text-[12px] opacity-60" style={{ color: theme.text }}>{item.desc}</p>
+                                                <h3 className="font-medium mb-1 text-[14px] md:text-[15px]" style={{ color: theme.text }}>{item.label}</h3>
+                                                <p className="text-[11px] md:text-[12px] opacity-60" style={{ color: theme.text }}>{item.desc}</p>
                                             </div>
                                         ))}
                                     </div>
@@ -881,24 +1030,23 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                             {activeTab === 'README.md' && (
                                 <div className="max-w-4xl">
                                     {/* Header Section */}
-                                    <div className="mb-8 pb-6 border-b" style={{ borderColor: theme.border }}>
-                                        <h1 className="text-[36px] font-bold mb-2" style={{ color: theme.accent }}>
+                                    <div className="mb-6 md:mb-8 pb-4 md:pb-6 border-b" style={{ borderColor: theme.border }}>
+                                        <h1 className="text-[24px] md:text-[36px] font-bold mb-2" style={{ color: theme.accent }}>
                                             👋 Hi, I'm Dixon Zor
                                         </h1>
-                                        <p className="text-[18px] opacity-80" style={{ color: theme.text }}>
+                                        <p className="text-[14px] md:text-[18px] opacity-80" style={{ color: theme.text }}>
                                             Computer Science Graduate | AI/ML Enthusiast | Problem Solver
                                         </p>
                                     </div>
 
                                     {/* About Section */}
-                                    <div className="mb-8">
-                                        <h2 className="text-[22px] font-semibold mb-4 flex items-center gap-2" style={{ color: theme.text }}>
-                                            <span className="text-[24px]">🚀</span>
+                                    <div className="mb-6 md:mb-8">
+                                        <h2 className="text-[18px] md:text-[22px] font-semibold mb-3 md:mb-4" style={{ color: theme.text }}>
                                             About Me
                                         </h2>
-                                        <div className="p-6 rounded-lg leading-relaxed text-[15px]" style={{ backgroundColor: theme.sidebar, color: theme.text }}>
+                                        <div className="p-4 md:p-6 rounded-lg leading-relaxed text-[13px] md:text-[15px]" style={{ backgroundColor: theme.sidebar, color: theme.text }}>
                                             {aboutText.split('. ').map((sentence, i) => (
-                                                <p key={i} className="mb-3 last:mb-0">
+                                                <p key={i} className="mb-2 md:mb-3 last:mb-0">
                                                     {sentence}{sentence && !sentence.endsWith('.') && i < aboutText.split('. ').length - 1 ? '.' : ''}
                                                 </p>
                                             ))}
@@ -906,12 +1054,12 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                     </div>
 
                                     {/* Quick Links Section */}
-                                    <div className="mb-8">
-                                        <h2 className="text-[22px] font-semibold mb-4 flex items-center gap-2" style={{ color: theme.text }}>
-                                            <span className="text-[24px]">🔗</span>
+                                    <div className="mb-6 md:mb-8">
+                                        <h2 className="text-[18px] md:text-[22px] font-semibold mb-3 md:mb-4 flex items-center gap-2" style={{ color: theme.text }}>
+                                            <span className="text-[20px] md:text-[24px]">🔗</span>
                                             Connect With Me
                                         </h2>
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
                                             {[
                                                 { icon: '📧', label: 'Email', value: 'dixonzor@gmail.com', href: 'mailto:dixonzor@gmail.com' },
                                                 { icon: '💼', label: 'LinkedIn', value: 'dixon-zor', href: 'https://linkedin.com/in/dixon-zor' },
@@ -921,14 +1069,14 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                                     key={item.label}
                                                     href={item.href}
                                                     target="_blank"
-                                                    className="p-4 rounded-lg border transition-all hover:scale-105"
+                                                    className="p-3 md:p-4 rounded-lg border transition-all hover:scale-105"
                                                     style={{ backgroundColor: theme.sidebar, borderColor: theme.border }}
                                                     onMouseEnter={(e) => e.currentTarget.style.borderColor = theme.accent}
                                                     onMouseLeave={(e) => e.currentTarget.style.borderColor = theme.border}
                                                 >
-                                                    <div className="text-[28px] mb-2">{item.icon}</div>
-                                                    <div className="font-semibold text-[14px] mb-1" style={{ color: theme.text }}>{item.label}</div>
-                                                    <div className="text-[12px] opacity-70" style={{ color: theme.text }}>{item.value}</div>
+                                                    <div className="text-[24px] md:text-[28px] mb-2">{item.icon}</div>
+                                                    <div className="font-semibold text-[13px] md:text-[14px] mb-1" style={{ color: theme.text }}>{item.label}</div>
+                                                    <div className="text-[11px] md:text-[12px] opacity-70 truncate" style={{ color: theme.text }}>{item.value}</div>
                                                 </a>
                                             ))}
                                         </div>
@@ -936,11 +1084,11 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
 
                                     {/* Interests Section */}
                                     <div>
-                                        <h2 className="text-[22px] font-semibold mb-4 flex items-center gap-2" style={{ color: theme.text }}>
-                                            <span className="text-[24px]">💡</span>
+                                        <h2 className="text-[18px] md:text-[22px] font-semibold mb-3 md:mb-4 flex items-center gap-2" style={{ color: theme.text }}>
+                                            <span className="text-[20px] md:text-[24px]">💡</span>
                                             What Drives Me
                                         </h2>
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
                                             {[
                                                 { emoji: '🤖', label: 'Machine Learning' },
                                                 { emoji: '🏈', label: 'NFL Analytics' },
@@ -949,11 +1097,11 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                             ].map(item => (
                                                 <div
                                                     key={item.label}
-                                                    className="p-4 rounded-lg text-center border"
+                                                    className="p-3 md:p-4 rounded-lg text-center border"
                                                     style={{ backgroundColor: theme.sidebar, borderColor: theme.border }}
                                                 >
-                                                    <div className="text-[32px] mb-2">{item.emoji}</div>
-                                                    <div className="text-[13px] font-medium" style={{ color: theme.text }}>{item.label}</div>
+                                                    <div className="text-[24px] md:text-[32px] mb-1 md:mb-2">{item.emoji}</div>
+                                                    <div className="text-[11px] md:text-[13px] font-medium" style={{ color: theme.text }}>{item.label}</div>
                                                 </div>
                                             ))}
                                         </div>
@@ -962,44 +1110,44 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                             )}
 
                             {activeTab === 'experience.json' && (
-                                <div className="space-y-6">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <h1 className="text-[24px] font-light text-white">Experience</h1>
+                                <div className="space-y-4 md:space-y-6">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                                        <h1 className="text-[20px] md:text-[24px] font-light text-white">Experience</h1>
                                         <div className="flex gap-2">
                                             <button
                                                 onClick={() => setViewMode('preview')}
-                                                className={`px-3 py-1 text-[12px] rounded ${viewMode === 'preview' ? 'bg-[#007acc] text-white' : 'text-[#969696] hover:text-white'}`}
+                                                className={`px-2 md:px-3 py-1 text-[11px] md:text-[12px] rounded ${viewMode === 'preview' ? 'bg-[#007acc] text-white' : 'text-[#969696] hover:text-white'}`}
                                             >
                                                 Preview
                                             </button>
                                             <button
                                                 onClick={() => setViewMode('code')}
-                                                className={`px-3 py-1 text-[12px] rounded ${viewMode === 'code' ? 'bg-[#007acc] text-white' : 'text-[#969696] hover:text-white'}`}
+                                                className={`px-2 md:px-3 py-1 text-[11px] md:text-[12px] rounded ${viewMode === 'code' ? 'bg-[#007acc] text-white' : 'text-[#969696] hover:text-white'}`}
                                             >
                                                 JSON
                                             </button>
                                         </div>
                                     </div>
                                     {viewMode === 'code' ? (
-                                        <pre className="p-4 rounded border text-[13px] font-mono text-[#ce9178] overflow-x-auto" style={{ backgroundColor: theme.editor, borderColor: theme.border }}>
+                                        <pre className="p-3 md:p-4 rounded border text-[11px] md:text-[13px] font-mono text-[#ce9178] overflow-x-auto" style={{ backgroundColor: theme.editor, borderColor: theme.border }}>
                                             {JSON.stringify({ experiences }, null, 2)}
                                         </pre>
                                     ) : (
-                                        <div className="space-y-4">
+                                        <div className="space-y-3 md:space-y-4">
                                             {experiences.map((exp, i) => (
-                                                <div key={i} className="p-4 bg-[#252526] border border-[#3c3c3c] rounded">
-                                                    <div className="flex justify-between items-start mb-2">
+                                                <div key={i} className="p-3 md:p-4 bg-[#252526] border border-[#3c3c3c] rounded">
+                                                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-2">
                                                         <div>
-                                                            <h3 className="text-white font-medium">{exp.role}</h3>
-                                                            <p className="text-[#007acc] text-[13px]">{exp.company}</p>
+                                                            <h3 className="text-white font-medium text-[14px] md:text-base">{exp.role}</h3>
+                                                            <p className="text-[#007acc] text-[12px] md:text-[13px]">{exp.company}</p>
                                                         </div>
-                                                        <span className="text-[11px] text-[#969696] bg-[#3c3c3c] px-2 py-1 rounded">
+                                                        <span className="text-[10px] md:text-[11px] text-[#969696] bg-[#3c3c3c] px-2 py-1 rounded self-start">
                                                             {exp.period}
                                                         </span>
                                                     </div>
                                                     <ul className="mt-3 space-y-1">
                                                         {exp.highlights.map((h: string, j: number) => (
-                                                            <li key={j} className="text-[13px] text-[#cccccc] flex gap-2">
+                                                            <li key={j} className="text-[12px] md:text-[13px] text-[#cccccc] flex gap-2">
                                                                 <span className="text-[#007acc]">•</span> {h}
                                                             </li>
                                                         ))}
@@ -1012,34 +1160,34 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                             )}
 
                             {activeTab === 'education.json' && (
-                                <div className="space-y-6">
-                                    <h1 className="text-[24px] font-light text-white mb-2">Education</h1>
-                                    <p className="text-[#969696] text-[13px] mb-6">Academic background from resume</p>
+                                <div className="space-y-4 md:space-y-6">
+                                    <h1 className="text-[20px] md:text-[24px] font-light text-white mb-2">Education</h1>
+                                    <p className="text-[#969696] text-[12px] md:text-[13px] mb-4 md:mb-6">Academic background from resume</p>
 
                                     {education.map((edu: any, i: number) => (
-                                        <div key={i} className="p-6 bg-gradient-to-br from-[#252526] to-[#1e1e1e] border border-[#3c3c3c] rounded-lg">
+                                        <div key={i} className="p-4 md:p-6 bg-gradient-to-br from-[#252526] to-[#1e1e1e] border border-[#3c3c3c] rounded-lg">
                                             {/* Header */}
-                                            <div className="flex items-start justify-between mb-4">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-14 h-14 bg-[#007acc]/20 rounded-lg flex items-center justify-center">
-                                                        <GraduationCap className="w-7 h-7 text-[#007acc]" />
+                                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
+                                                <div className="flex items-center gap-3 md:gap-4">
+                                                    <div className="w-10 h-10 md:w-14 md:h-14 bg-[#007acc]/20 rounded-lg flex items-center justify-center shrink-0">
+                                                        <GraduationCap className="w-5 h-5 md:w-7 md:h-7 text-[#007acc]" />
                                                     </div>
                                                     <div>
-                                                        <h2 className="text-[18px] text-white font-medium">{edu.institution}</h2>
-                                                        <p className="text-[#007acc] text-[14px]">{edu.college || 'College of Engineering'}</p>
+                                                        <h2 className="text-[15px] md:text-[18px] text-white font-medium">{edu.institution}</h2>
+                                                        <p className="text-[#007acc] text-[12px] md:text-[14px]">{edu.college || 'College of Engineering'}</p>
                                                     </div>
                                                 </div>
-                                                <span className="text-[12px] text-[#969696] bg-[#3c3c3c] px-3 py-1 rounded-full">
+                                                <span className="text-[11px] md:text-[12px] text-[#969696] bg-[#3c3c3c] px-2 md:px-3 py-1 rounded-full self-start">
                                                     {edu.period}
                                                 </span>
                                             </div>
 
                                             {/* Degree Info */}
-                                            <div className="rounded-lg p-4 mb-4" style={{ backgroundColor: theme.editor }}>
-                                                <div className="text-[14px] text-white font-medium mb-1">
+                                            <div className="rounded-lg p-3 md:p-4 mb-4" style={{ backgroundColor: theme.editor }}>
+                                                <div className="text-[13px] md:text-[14px] text-white font-medium mb-1">
                                                     {edu.degree} in {edu.field}
                                                 </div>
-                                                <div className="text-[13px] text-[#969696]">
+                                                <div className="text-[12px] md:text-[13px] text-[#969696]">
                                                     Graduated with focus on Machine Learning, AI, and Software Engineering
                                                 </div>
                                             </div>
@@ -1047,11 +1195,11 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                             {/* Achievements */}
                                             {edu.honors && (
                                                 <div>
-                                                    <h4 className="text-[12px] text-[#969696] uppercase tracking-wide mb-3">Achievements & Coursework</h4>
+                                                    <h4 className="text-[11px] md:text-[12px] text-[#969696] uppercase tracking-wide mb-3">Achievements & Coursework</h4>
                                                     <div className="space-y-2">
                                                         {edu.honors.map((h: string, j: number) => (
-                                                            <div key={j} className="flex items-center gap-3 text-[13px] text-[#cccccc]">
-                                                                <span className="w-5 h-5 bg-yellow-500/20 rounded flex items-center justify-center text-yellow-500">★</span>
+                                                            <div key={j} className="flex items-start gap-2 md:gap-3 text-[12px] md:text-[13px] text-[#cccccc]">
+                                                                <span className="w-4 h-4 md:w-5 md:h-5 bg-yellow-500/20 rounded flex items-center justify-center text-yellow-500 shrink-0 text-[10px] md:text-xs">★</span>
                                                                 <span>{h}</span>
                                                             </div>
                                                         ))}
@@ -1064,7 +1212,7 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                             )}
 
                             {activeTab === 'skills.ts' && (
-                                <pre className="font-mono text-[13px] leading-relaxed">
+                                <pre className="font-mono text-[11px] md:text-[13px] leading-relaxed overflow-x-auto">
                                     <span className="text-[#569cd6]">export const</span> <span className="text-[#dcdcaa]">skills</span> = {'{'}{'\n'}
                                     {'  '}<span className="text-[#9cdcfe]">languages</span>: [<span className="text-[#ce9178]">"JavaScript", "Python", "C++", "SQL"</span>],{'\n'}
                                     {'  '}<span className="text-[#9cdcfe]">frameworks</span>: [<span className="text-[#ce9178]">"React", "Next.js", "Flask", "FastAPI"</span>],{'\n'}
@@ -1076,16 +1224,16 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
 
                             {activeTab === 'contact.md' && (
                                 <div className="space-y-4">
-                                    <h1 className="text-[24px] font-light text-white mb-6"># Contact</h1>
+                                    <h1 className="text-[20px] md:text-[24px] font-light text-white mb-4 md:mb-6"># Contact</h1>
                                     <div className="space-y-3">
                                         {[
                                             { label: 'Email', value: 'dixonzor@gmail.com', href: 'mailto:dixonzor@gmail.com' },
                                             { label: 'GitHub', value: 'github.com/DixonzorCmpsi', href: 'https://github.com/DixonzorCmpsi' },
                                             { label: 'LinkedIn', value: 'linkedin.com/in/dixon-zor', href: 'https://linkedin.com/in/dixon-zor' },
                                         ].map(item => (
-                                            <div key={item.label} className="flex items-center gap-4">
-                                                <span className="text-[#969696] w-20">{item.label}:</span>
-                                                <a href={item.href} target="_blank" className="text-[#007acc] hover:underline">
+                                            <div key={item.label} className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
+                                                <span className="text-[#969696] text-[12px] md:text-[13px] w-20">{item.label}:</span>
+                                                <a href={item.href} target="_blank" className="text-[#007acc] hover:underline text-[13px] md:text-[14px] break-all">
                                                     {item.value}
                                                 </a>
                                             </div>
@@ -1096,29 +1244,29 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
 
                             {/* Projects List View */}
                             {activeTab === 'projects.tsx' && (
-                                <div className="space-y-6">
-                                    <h1 className="text-[24px] font-light text-white mb-6">Projects</h1>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-4 md:space-y-6">
+                                    <h1 className="text-[20px] md:text-[24px] font-light text-white mb-4 md:mb-6">Projects</h1>
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
                                         {rosterData.filter(p => p.type === 'repo').map(project => (
                                             <div
                                                 key={project.position}
                                                 onClick={() => handleOpenFile(`project-${project.position}`)}
-                                                className="p-5 bg-[#252526] border border-[#3c3c3c] rounded-lg hover:border-[#007acc] cursor-pointer transition-all hover:bg-[#2a2d2e] group"
+                                                className="p-4 md:p-5 bg-[#252526] border border-[#3c3c3c] rounded-lg hover:border-[#007acc] cursor-pointer transition-all hover:bg-[#2a2d2e] group"
                                             >
-                                                <div className="flex items-start gap-4">
-                                                    <span className="text-3xl">{project.icon}</span>
+                                                <div className="flex items-start gap-3 md:gap-4">
+                                                    <span className="text-2xl md:text-3xl">{project.icon}</span>
                                                     <div className="flex-1 min-w-0">
-                                                        <h3 className="text-white font-medium text-[15px] group-hover:text-[#007acc] transition-colors">
+                                                        <h3 className="text-white font-medium text-[14px] md:text-[15px] group-hover:text-[#007acc] transition-colors">
                                                             {project.display_name}
                                                         </h3>
-                                                        <p className="text-[#969696] text-[12px] mt-1 line-clamp-2">
+                                                        <p className="text-[#969696] text-[11px] md:text-[12px] mt-1 line-clamp-2">
                                                             {project.stats?.description || 'No description available'}
                                                         </p>
-                                                        <div className="flex items-center gap-3 mt-3">
-                                                            <span className="text-[11px] bg-[#007acc]/20 text-[#007acc] px-2 py-0.5 rounded">
+                                                        <div className="flex items-center gap-2 md:gap-3 mt-2 md:mt-3 flex-wrap">
+                                                            <span className="text-[10px] md:text-[11px] bg-[#007acc]/20 text-[#007acc] px-2 py-0.5 rounded">
                                                                 {project.stats?.language || 'Code'}
                                                             </span>
-                                                            <span className="text-[11px] text-[#969696] flex items-center gap-1">
+                                                            <span className="text-[10px] md:text-[11px] text-[#969696] flex items-center gap-1">
                                                                 <Star className="w-3 h-3 text-yellow-500" />
                                                                 {project.stats?.stars || 0}
                                                             </span>
@@ -1137,33 +1285,33 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                 const project = rosterData.find(p => String(p.position) === projectId);
                                 if (!project) return null;
                                 return (
-                                    <div className="flex h-full">
+                                    <div className="flex flex-col lg:flex-row h-full">
                                         {/* Left: Project Details */}
-                                        <div className="flex-1 p-6 overflow-y-auto">
-                                            <div className="flex items-center gap-4 mb-6">
-                                                <span className="text-4xl">{project.icon}</span>
+                                        <div className="flex-1 p-4 md:p-6 overflow-y-auto">
+                                            <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
+                                                <span className="text-3xl md:text-4xl">{project.icon}</span>
                                                 <div>
-                                                    <h1 className="text-[24px] font-light text-white">{project.display_name}</h1>
-                                                    <div className="flex items-center gap-3 mt-2">
-                                                        <span className="text-[11px] bg-[#007acc]/20 text-[#007acc] px-2 py-0.5 rounded">
+                                                    <h1 className="text-[20px] md:text-[24px] font-light text-white">{project.display_name}</h1>
+                                                    <div className="flex items-center gap-2 md:gap-3 mt-2 flex-wrap">
+                                                        <span className="text-[10px] md:text-[11px] bg-[#007acc]/20 text-[#007acc] px-2 py-0.5 rounded">
                                                             {project.stats?.language}
                                                         </span>
-                                                        <span className="text-[11px] text-yellow-500 flex items-center gap-1">
+                                                        <span className="text-[10px] md:text-[11px] text-yellow-500 flex items-center gap-1">
                                                             <Star className="w-3 h-3" /> {project.stats?.stars} stars
                                                         </span>
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            <div className="mb-8">
-                                                <h3 className="text-white text-[14px] font-medium mb-3 flex items-center gap-2">
+                                            <div className="mb-6 md:mb-8">
+                                                <h3 className="text-white text-[13px] md:text-[14px] font-medium mb-2 md:mb-3 flex items-center gap-2">
                                                     <Activity className="w-4 h-4 text-[#007acc]" />
                                                     Project Summary
                                                     {isLoadingAiSummary && (
                                                         <span className="text-[10px] text-[#007acc] animate-pulse ml-2">✨ AI generating...</span>
                                                     )}
                                                 </h3>
-                                                <div className="p-4 bg-[#252526] border border-[#3c3c3c] rounded-lg text-[#cccccc] text-[14px] leading-relaxed shadow-sm">
+                                                <div className="p-3 md:p-4 bg-[#252526] border border-[#3c3c3c] rounded-lg text-[#cccccc] text-[13px] md:text-[14px] leading-relaxed shadow-sm">
                                                     {isLoadingAiSummary ? (
                                                         <div className="flex items-center gap-2">
                                                             <div className="w-4 h-4 border-2 border-[#007acc] border-t-transparent rounded-full animate-spin"></div>
@@ -1177,11 +1325,11 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                                 </div>
                                             </div>
 
-                                            <div className="flex gap-3 mb-6">
+                                            <div className="flex flex-wrap gap-2 md:gap-3 mb-4 md:mb-6">
                                                 <a
                                                     href={project.stats?.url}
                                                     target="_blank"
-                                                    className="inline-flex items-center gap-2 bg-[#007acc] hover:bg-[#005a9e] text-white px-4 py-2 rounded text-[13px] transition-colors"
+                                                    className="inline-flex items-center gap-2 bg-[#007acc] hover:bg-[#005a9e] text-white px-3 md:px-4 py-2 rounded text-[12px] md:text-[13px] transition-colors"
                                                 >
                                                     <GitBranch className="w-4 h-4" /> View on GitHub
                                                 </a>
@@ -1189,7 +1337,7 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                                     <a
                                                         href={project.stats.demoLink}
                                                         target="_blank"
-                                                        className="inline-flex items-center gap-2 bg-[#28a745] hover:bg-[#218838] text-white px-4 py-2 rounded text-[13px] transition-colors"
+                                                        className="inline-flex items-center gap-2 bg-[#28a745] hover:bg-[#218838] text-white px-3 md:px-4 py-2 rounded text-[12px] md:text-[13px] transition-colors"
                                                     >
                                                         <Maximize2 className="w-4 h-4" /> Live Demo
                                                     </a>
@@ -1198,14 +1346,14 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
 
                                             {/* Project Media Gallery */}
                                             {(project.stats?.images?.length > 0 || project.stats?.videos?.length > 0) && (
-                                                <div className="mb-6">
-                                                    <h3 className="text-white text-[14px] font-medium mb-4 flex items-center gap-2">
+                                                <div className="mb-4 md:mb-6">
+                                                    <h3 className="text-white text-[13px] md:text-[14px] font-medium mb-3 md:mb-4 flex items-center gap-2">
                                                         📸 Project Media
                                                     </h3>
 
                                                     {/* Images */}
                                                     {project.stats?.images?.length > 0 && (
-                                                        <div className="grid grid-cols-2 gap-3 mb-4">
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3 mb-4">
                                                             {project.stats.images.map((img: string, i: number) => (
                                                                 <div key={i} className="relative aspect-video rounded overflow-hidden border transition-colors" style={{ backgroundColor: theme.editor, borderColor: theme.border }}>
                                                                     <img
@@ -1226,7 +1374,7 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                                                 <div key={i} className="bg-[#1e1e1e] rounded overflow-hidden border border-[#3c3c3c]">
                                                                     <video
                                                                         controls
-                                                                        className="w-full max-h-[400px]"
+                                                                        className="w-full max-h-[300px] md:max-h-[400px]"
                                                                         preload="metadata"
                                                                         poster={project.stats?.images?.[0] ? `/api${project.stats.images[0]}` : undefined}
                                                                         playsInline
@@ -1234,7 +1382,7 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                                                         <source src={`/api${vid}`} type="video/mp4" />
                                                                         Your browser does not support the video tag.
                                                                     </video>
-                                                                    <div className="p-2 text-[11px] text-[#969696] bg-[#252526]">
+                                                                    <div className="p-2 text-[10px] md:text-[11px] text-[#969696] bg-[#252526]">
                                                                         📹 {vid.split('/').pop()?.replace(/%20/g, ' ')}
                                                                     </div>
                                                                 </div>
@@ -1245,33 +1393,33 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                             )}
 
                                             {project.stats?.readme && (
-                                                <div className="p-4 bg-[#1e1e1e] border border-[#3c3c3c] rounded">
-                                                    <h3 className="text-white text-[13px] font-medium mb-3 flex items-center gap-2">
+                                                <div className="p-3 md:p-4 bg-[#1e1e1e] border border-[#3c3c3c] rounded">
+                                                    <h3 className="text-white text-[12px] md:text-[13px] font-medium mb-3 flex items-center gap-2">
                                                         <FileText className="w-4 h-4" /> README.md
                                                     </h3>
-                                                    <pre className="text-[#cccccc] text-[12px] whitespace-pre-wrap font-mono max-h-[400px] overflow-y-auto">
+                                                    <pre className="text-[#cccccc] text-[11px] md:text-[12px] whitespace-pre-wrap font-mono max-h-[300px] md:max-h-[400px] overflow-y-auto">
                                                         {project.stats.readme}
                                                     </pre>
                                                 </div>
                                             )}
                                         </div>
 
-                                        {/* Right: AI Chat Panel */}
-                                        <div className="w-[350px] bg-[#252526] border-l border-[#3c3c3c] flex flex-col shrink-0">
-                                            <div className="p-3 border-b border-[#3c3c3c] text-[12px] font-medium text-[#cccccc] flex items-center gap-2">
+                                        {/* Right: AI Chat Panel - Hidden on mobile, shown at bottom or side on larger screens */}
+                                        <div className="w-full lg:w-[300px] xl:w-[350px] bg-[#252526] border-t lg:border-t-0 lg:border-l border-[#3c3c3c] flex flex-col shrink-0 max-h-[400px] lg:max-h-none">
+                                            <div className="p-2 md:p-3 border-b border-[#3c3c3c] text-[11px] md:text-[12px] font-medium text-[#cccccc] flex items-center gap-2">
                                                 <span className="w-2 h-2 rounded-full bg-green-500"></span>
                                                 Project Assistant
                                             </div>
-                                            <div className="flex-1 overflow-y-auto p-3 space-y-3" style={{ backgroundColor: theme.editor }}>
+                                            <div className="flex-1 overflow-y-auto p-2 md:p-3 space-y-2 md:space-y-3" style={{ backgroundColor: theme.editor }}>
                                                 {projectChatHistory.length === 0 && (
-                                                    <div className="text-[#969696] text-center text-[12px] mt-10 px-4">
+                                                    <div className="text-[#969696] text-center text-[11px] md:text-[12px] mt-6 md:mt-10 px-3 md:px-4">
                                                         <p className="mb-2">👋 Hi! I'm your AI context assistant.</p>
                                                         <p>Ask me anything about <strong>{project.display_name}</strong>!</p>
                                                     </div>
                                                 )}
                                                 {projectChatHistory.map((msg, i) => (
                                                     <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                                        <div className={`max-w-[85%] p-2 rounded text-[12px] ${msg.role === 'user'
+                                                        <div className={`max-w-[90%] md:max-w-[85%] p-2 rounded text-[11px] md:text-[12px] ${msg.role === 'user'
                                                             ? 'bg-[#007acc] text-white'
                                                             : 'bg-[#3c3c3c] text-[#cccccc]'
                                                             }`}>
@@ -1320,10 +1468,10 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                         </div>
                     </div>
 
-                    {/* Terminal Resize Handle */}
+                    {/* Terminal Resize Handle - hidden on mobile */}
                     {isTerminalOpen && (
                         <div
-                            className={`h-1 cursor-ns-resize hover:bg-[#007acc] transition-colors ${isResizingTerminal ? 'bg-[#007acc]' : 'bg-transparent'}`}
+                            className={`h-1 cursor-ns-resize hover:bg-[#007acc] transition-colors hidden md:block ${isResizingTerminal ? 'bg-[#007acc]' : 'bg-transparent'}`}
                             onMouseDown={() => setIsResizingTerminal(true)}
                         />
                     )}
@@ -1332,20 +1480,21 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                     {isTerminalOpen && (
                         <div
                             className="border-t flex flex-col shrink-0"
-                            style={{ height: terminalHeight, backgroundColor: theme.editor, borderColor: theme.border }}
+                            style={{ height: isMobile ? '250px' : terminalHeight, backgroundColor: theme.editor, borderColor: theme.border }}
                         >
-                            <div className="h-[35px] bg-[#252526] flex items-center justify-between px-2 shrink-0">
-                                <div className="flex items-center gap-4">
-                                    <div className="flex items-center gap-2 px-2 py-1 bg-[#1e1e1e] text-[12px]">
-                                        <TerminalIcon className="w-3 h-3" />
-                                        <span>TERMINAL</span>
+                            <div className="h-[30px] md:h-[35px] bg-[#252526] flex items-center justify-between px-2 shrink-0">
+                                <div className="flex items-center gap-2 md:gap-4">
+                                    <div className="flex items-center gap-1 md:gap-2 px-2 py-1 bg-[#1e1e1e] text-[10px] md:text-[12px]">
+                                        <MessageSquare className="w-3 h-3 text-[#007acc]" />
+                                        <span className="text-[#007acc]">AI Chat</span>
+                                        <span className="hidden sm:inline text-[#969696]">/ Terminal</span>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-1">
-                                    <button className="p-1 hover:bg-[#3c3c3c] rounded">
+                                    <button className="p-1 hover:bg-[#3c3c3c] rounded hidden sm:block">
                                         <Split className="w-4 h-4" />
                                     </button>
-                                    <button className="p-1 hover:bg-[#3c3c3c] rounded">
+                                    <button className="p-1 hover:bg-[#3c3c3c] rounded hidden sm:block">
                                         <Maximize2 className="w-4 h-4" />
                                     </button>
                                     <button
@@ -1358,14 +1507,10 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                             </div>
                             <div
                                 ref={terminalRef}
-                                className="flex-1 overflow-y-auto p-2 font-mono text-[13px] bg-[#1e1e1e]"
+                                className="flex-1 overflow-y-auto p-2 font-mono text-[11px] md:text-[13px] bg-[#1e1e1e]"
                             >
-                                <div className="text-[#569cd6] mb-2">
-                                    Windows PowerShell<br />
-                                    Copyright (C) Microsoft Corporation. All rights reserved.
-                                </div>
                                 <div className="text-[#4ec9b0] mb-2">
-                                    Dixon's AI Assistant Ready. Type a question about Dixon...
+                                    👋 Hi! I'm Dixon's AI Assistant. Ask me anything about Dixon's skills, projects, or experience...
                                 </div>
                                 {terminalHistory.map((msg, i) => (
                                     <div key={i} className="mb-1">
@@ -1386,13 +1531,13 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                 )}
                             </div>
                             <form onSubmit={handleTerminalSubmit} className="px-2 pb-2">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-[#dcdcaa] text-[13px] font-mono">PS C:\portfolio&gt;</span>
+                                <div className="flex items-center gap-1 md:gap-2">
+                                    <span className="text-[#dcdcaa] text-[10px] md:text-[13px] font-mono whitespace-nowrap">PS&gt;</span>
                                     <input
                                         type="text"
                                         value={terminalInput}
                                         onChange={(e) => setTerminalInput(e.target.value)}
-                                        className="flex-1 bg-transparent text-white outline-none font-mono text-[13px]"
+                                        className="flex-1 bg-transparent text-white outline-none font-mono text-[11px] md:text-[13px] min-w-0"
                                         placeholder="Ask about Dixon..."
                                         autoFocus
                                     />
@@ -1405,31 +1550,31 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
 
             {/* Status Bar */}
             <div
-                className="h-[22px] flex items-center justify-between px-2 text-[12px] text-white shrink-0"
+                className="h-[20px] md:h-[22px] flex items-center justify-between px-2 text-[10px] md:text-[12px] text-white shrink-0"
                 style={{ backgroundColor: theme.accent }}
             >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 md:gap-3">
                     <span className="flex items-center gap-1">
-                        <GitBranch className="w-3 h-3" /> main
+                        <GitBranch className="w-3 h-3" /> <span className="hidden sm:inline">main</span>
                     </span>
-                    <span className="hover:bg-white/10 px-1 cursor-pointer">0 ↺</span>
+                    <span className="hover:bg-white/10 px-1 cursor-pointer hidden sm:inline">0 ↺</span>
                 </div>
-                <div className="flex items-center gap-3">
-                    <span>Ln 1, Col 1</span>
-                    <span>Spaces: 2</span>
-                    <span>UTF-8</span>
+                <div className="flex items-center gap-2 md:gap-3">
+                    <span className="hidden sm:inline">Ln 1, Col 1</span>
+                    <span className="hidden md:inline">Spaces: 2</span>
+                    <span className="hidden md:inline">UTF-8</span>
                     <span
                         className="hover:bg-white/10 px-1 cursor-pointer"
                         onClick={() => setShowThemeMenu(!showThemeMenu)}
                     >
-                        🎨 {themes[currentTheme].name}
+                        🎨 <span className="hidden sm:inline">{themes[currentTheme].name}</span>
                     </span>
                     <button
                         onClick={() => setIsTerminalOpen(!isTerminalOpen)}
                         className="flex items-center gap-1 hover:bg-white/10 px-1"
                     >
                         <TerminalIcon className="w-3 h-3" />
-                        {isTerminalOpen ? 'Terminal' : 'Terminal (hidden)'}
+                        <span className="hidden sm:inline">{isTerminalOpen ? 'Terminal' : 'Terminal (hidden)'}</span>
                     </button>
                 </div>
             </div>
@@ -1438,15 +1583,15 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
             {
                 showResumeModal && (
                     <div
-                        className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+                        className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
                         onClick={() => setShowResumeModal(false)}
                     >
                         <div
-                            className="relative bg-[#1e1e1e] rounded-lg shadow-2xl w-[90vw] h-[90vh] max-w-5xl"
+                            className="relative bg-[#1e1e1e] rounded-lg shadow-2xl w-full h-full max-w-5xl max-h-[90vh]"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <div className="absolute top-0 left-0 right-0 h-10 bg-[#2d2d2d] rounded-t-lg flex items-center justify-between px-4">
-                                <span className="text-[13px] text-white">resume.pdf - Dixon Zor</span>
+                            <div className="absolute top-0 left-0 right-0 h-10 bg-[#2d2d2d] rounded-t-lg flex items-center justify-between px-3 md:px-4">
+                                <span className="text-[12px] md:text-[13px] text-white truncate">resume.pdf - Dixon Zor</span>
                                 <button
                                     onClick={() => setShowResumeModal(false)}
                                     className="text-[#969696] hover:text-white p-1 rounded hover:bg-[#3c3c3c]"

@@ -5,7 +5,7 @@
     "label": "QB",
     "x": 60,
     "y": 20,
-    "linkedin_url": "https://www.linkedin.com/in/yourprofile",
+    "linkedin_url": "https://www.linkedin.com/in/dixon-zor",
     "resume_url": "/resume.pdf"
   },
   "roster": [
@@ -13,8 +13,8 @@
       "position": "RB",
       "x": 40,
       "y": 20,
-      "repo_name": "Portfolio-Website",
-      "display_name": "Portfolio Website",
+      "repo_name": "Personal-website",
+      "display_name": "Personal Website",
       "type": "repo",
       "icon": "🌐"
     },
@@ -25,7 +25,7 @@
       "repo_name": "",
       "display_name": "LinkedIn",
       "type": "link",
-      "url": "https://linkedin.com/in/yourprofile",
+      "url": "https://linkedin.com/in/dixon-zor",
       "icon": "🔗"
     },
     {
@@ -41,10 +41,10 @@
       "position": "C",
       "x": 42,
       "y": 45,
-      "repo_name": "LLM-Chatbot",
-      "display_name": "LLM Chatbot",
+      "repo_name": "MERN_Fantasy_NFL",
+      "display_name": "MERN Fantasy NFL",
       "type": "repo",
-      "icon": "🤖"
+      "icon": "🏆"
     },
     {
       "position": "RG",
@@ -71,26 +71,26 @@
       "repo_name": "",
       "display_name": "YouTube",
       "type": "link",
-      "url": "https://youtube.com/@yourchannel",
+      "url": "https://www.youtube.com/@DeeMedia21",
       "icon": "📺"
     },
     {
       "position": "TE_L",
       "x": 10,
       "y": 70,
-      "repo_name": "interests-repo",
-      "display_name": "Interests",
+      "repo_name": "LLM-Chatbot",
+      "display_name": "LLM Chatbot",
       "type": "repo",
-      "icon": "🎮"
+      "icon": "🤖"
     },
     {
       "position": "TE_R",
       "x": 90,
       "y": 70,
-      "repo_name": "hobbies-repo",
-      "display_name": "Hobbies",
+      "repo_name": "Data-Analysis-eyetracker",
+      "display_name": "Eye Tracker Analysis",
       "type": "repo",
-      "icon": "🏀"
+      "icon": "👁️"
     }
   ]
 }

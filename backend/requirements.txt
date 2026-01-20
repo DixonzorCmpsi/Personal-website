@@ -9,3 +9,4 @@ langchain-huggingface
 langchain-pinecone
 sentence-transformers
 huggingface_hub
+google-genai

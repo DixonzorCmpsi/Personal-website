@@ -10,8 +10,8 @@ const getApiUrl = (): string => {
             return 'https://api.deetalk.win';
         }
     }
-    // Default to localhost for development
-    return 'http://localhost:8000';
+    // Default to localhost:8001 for development (8000 is used by another service)
+    return 'http://localhost:8001';
 };
 
 export const API_URL = getApiUrl();
