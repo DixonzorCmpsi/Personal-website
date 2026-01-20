@@ -127,13 +127,32 @@ def query_hf_chat(user_message: str, system_prompt: str = DIXON_CONTEXT, model: 
         
         answer = response.choices[0].message.content
         
-        # Clean up the response
+        # Clean up the response - remove common model artifacts
         answer = answer.strip()
+        
+        # Remove common LLM artifacts
+        artifacts_to_remove = [
+            "[/USER]", "[/INST]", "[INST]", "</s>", "<s>",
+            "[/SYS]", "[SYS]", "<<SYS>>", "<</SYS>>",
+            "Human:", "Assistant:", "User:", "AI:",
+            "Answer:", "Response:"
+        ]
+        for artifact in artifacts_to_remove:
+            answer = answer.replace(artifact, "")
+        
+        # Remove leading/trailing punctuation artifacts
+        answer = answer.strip()
+        while answer and answer[0] in '?!.\n\t ':
+            answer = answer[1:].strip()
+        
         # Remove any incomplete sentences at the end
         if answer and not answer[-1] in '.!?':
             last_period = max(answer.rfind('.'), answer.rfind('!'), answer.rfind('?'))
             if last_period > len(answer) // 2:
                 answer = answer[:last_period + 1]
+        
+        # Final cleanup
+        answer = answer.strip()
         
         print(f"[HF Chat] Response: {answer[:100]}...")
         return answer if len(answer) > 10 else None
