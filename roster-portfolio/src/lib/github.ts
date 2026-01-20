@@ -52,14 +52,27 @@ function getProjectMedia(projectName: string): { images: string[], videos: strin
   // Read demo link from link.json
   try {
     if (fs.existsSync(linkFile)) {
+      console.log(`[getProjectMedia] Found link.json for ${projectName}`);
       const linkData = JSON.parse(fs.readFileSync(linkFile, 'utf-8'));
+      console.log(`[getProjectMedia] Link data:`, linkData);
       if (linkData.url && linkData.url.trim() !== '') {
         demoLink = linkData.url.startsWith('http') ? linkData.url : `https://${linkData.url}`;
+        console.log(`[getProjectMedia] Demo link set to: ${demoLink}`);
+      } else {
+        console.log(`[getProjectMedia] URL is empty in link.json`);
       }
+    } else {
+      console.log(`[getProjectMedia] No link.json found at: ${linkFile}`);
     }
   } catch (e) {
-    console.log(`No link.json or invalid format for ${projectName}`);
+    console.log(`Error reading link.json for ${projectName}:`, e);
   }
+
+  console.log(`[getProjectMedia] Final result for ${projectName}:`, { 
+    images: images.length, 
+    videos: videos.length, 
+    demoLink 
+  });
 
   return { images, videos, demoLink };
 }
@@ -104,8 +117,14 @@ export async function getRosterStats() {
       next: { revalidate: 3600 },
     });
     json = await response.json();
+    
+    if (json.errors) {
+      console.error("GitHub GraphQL Errors:", JSON.stringify(json.errors, null, 2));
+    }
+    
+    console.log("GitHub API Response received:", json.data ? "Success" : "No data");
   } catch (e) {
-    console.error("Fetch failed, using mock data");
+    console.error("Fetch failed:", e);
   }
 
   if (!json.data) {
@@ -140,6 +159,13 @@ export async function getRosterStats() {
     if (player.type === "repo") {
       const githubData = json.data[player.position];
       const readmeText = githubData?.readmeMain?.text || githubData?.readmeMaster?.text || githubData?.readmeHead?.text || "";
+
+      console.log(`[GitHub Data] ${player.display_name}:`, {
+        hasData: !!githubData,
+        url: githubData?.url,
+        stars: githubData?.stargazerCount,
+        description: githubData?.description?.substring(0, 50)
+      });
 
       // Get local media files for this project
       const media = getProjectMedia(player.display_name);
