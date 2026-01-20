@@ -51,7 +51,6 @@ export default async function Home() {
       field: "Computer Science",
       period: "2020 – May 2025",
       honors: [
-        "Dean's List (Multiple Semesters)",
         "Relevant Coursework: Machine Learning, AI Ethics, Data Structures, Algorithms, Computer Architecture"
       ]
     }
