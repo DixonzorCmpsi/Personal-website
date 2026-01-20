@@ -879,12 +879,84 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                             )}
 
                             {activeTab === 'README.md' && (
-                                <div className="prose prose-invert max-w-none">
-                                    <h1 className="text-[28px] font-normal text-white border-b border-[#3c3c3c] pb-4 mb-6">
-                                        # Dixon Zor
-                                    </h1>
-                                    <div className="text-[14px] text-[#cccccc] leading-relaxed whitespace-pre-wrap">
-                                        {aboutText}
+                                <div className="max-w-4xl">
+                                    {/* Header Section */}
+                                    <div className="mb-8 pb-6 border-b" style={{ borderColor: theme.border }}>
+                                        <h1 className="text-[36px] font-bold mb-2" style={{ color: theme.accent }}>
+                                            👋 Hi, I'm Dixon Zor
+                                        </h1>
+                                        <p className="text-[18px] opacity-80" style={{ color: theme.text }}>
+                                            Computer Science Graduate | AI/ML Enthusiast | Problem Solver
+                                        </p>
+                                    </div>
+
+                                    {/* About Section */}
+                                    <div className="mb-8">
+                                        <h2 className="text-[22px] font-semibold mb-4 flex items-center gap-2" style={{ color: theme.text }}>
+                                            <span className="text-[24px]">🚀</span>
+                                            About Me
+                                        </h2>
+                                        <div className="p-6 rounded-lg leading-relaxed text-[15px]" style={{ backgroundColor: theme.sidebar, color: theme.text }}>
+                                            {aboutText.split('. ').map((sentence, i) => (
+                                                <p key={i} className="mb-3 last:mb-0">
+                                                    {sentence}{sentence && !sentence.endsWith('.') && i < aboutText.split('. ').length - 1 ? '.' : ''}
+                                                </p>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Quick Links Section */}
+                                    <div className="mb-8">
+                                        <h2 className="text-[22px] font-semibold mb-4 flex items-center gap-2" style={{ color: theme.text }}>
+                                            <span className="text-[24px]">🔗</span>
+                                            Connect With Me
+                                        </h2>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            {[
+                                                { icon: '📧', label: 'Email', value: 'dixonzor@gmail.com', href: 'mailto:dixonzor@gmail.com' },
+                                                { icon: '💼', label: 'LinkedIn', value: 'dixon-zor', href: 'https://linkedin.com/in/dixon-zor' },
+                                                { icon: '🐙', label: 'GitHub', value: 'DixonzorCmpsi', href: 'https://github.com/DixonzorCmpsi' },
+                                            ].map(item => (
+                                                <a
+                                                    key={item.label}
+                                                    href={item.href}
+                                                    target="_blank"
+                                                    className="p-4 rounded-lg border transition-all hover:scale-105"
+                                                    style={{ backgroundColor: theme.sidebar, borderColor: theme.border }}
+                                                    onMouseEnter={(e) => e.currentTarget.style.borderColor = theme.accent}
+                                                    onMouseLeave={(e) => e.currentTarget.style.borderColor = theme.border}
+                                                >
+                                                    <div className="text-[28px] mb-2">{item.icon}</div>
+                                                    <div className="font-semibold text-[14px] mb-1" style={{ color: theme.text }}>{item.label}</div>
+                                                    <div className="text-[12px] opacity-70" style={{ color: theme.text }}>{item.value}</div>
+                                                </a>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Interests Section */}
+                                    <div>
+                                        <h2 className="text-[22px] font-semibold mb-4 flex items-center gap-2" style={{ color: theme.text }}>
+                                            <span className="text-[24px]">💡</span>
+                                            What Drives Me
+                                        </h2>
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                            {[
+                                                { emoji: '🤖', label: 'Machine Learning' },
+                                                { emoji: '🏈', label: 'NFL Analytics' },
+                                                { emoji: '💪', label: 'Fitness' },
+                                                { emoji: '🧩', label: 'Problem Solving' },
+                                            ].map(item => (
+                                                <div
+                                                    key={item.label}
+                                                    className="p-4 rounded-lg text-center border"
+                                                    style={{ backgroundColor: theme.sidebar, borderColor: theme.border }}
+                                                >
+                                                    <div className="text-[32px] mb-2">{item.emoji}</div>
+                                                    <div className="text-[13px] font-medium" style={{ color: theme.text }}>{item.label}</div>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -1113,6 +1185,15 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                                 >
                                                     <GitBranch className="w-4 h-4" /> View on GitHub
                                                 </a>
+                                                {project.stats?.demoLink && (
+                                                    <a
+                                                        href={project.stats.demoLink}
+                                                        target="_blank"
+                                                        className="inline-flex items-center gap-2 bg-[#28a745] hover:bg-[#218838] text-white px-4 py-2 rounded text-[13px] transition-colors"
+                                                    >
+                                                        <Maximize2 className="w-4 h-4" /> Live Demo
+                                                    </a>
+                                                )}
                                             </div>
 
                                             {/* Project Media Gallery */}

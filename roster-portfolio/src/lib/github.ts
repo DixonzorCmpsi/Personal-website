@@ -4,14 +4,16 @@ import path from 'path';
 
 const GITHUB_GRAPHQL_API = "https://api.github.com/graphql";
 
-// Function to get project media files from local folders
-function getProjectMedia(projectName: string): { images: string[], videos: string[] } {
+// Function to get project media files and demo link from local folders
+function getProjectMedia(projectName: string): { images: string[], videos: string[], demoLink?: string } {
   const projectDir = path.join(process.cwd(), '..', projectName);
   const imagesDir = path.join(projectDir, 'images');
   const videoDir = path.join(projectDir, 'video');
+  const linkFile = path.join(projectDir, 'link', 'link.json');
 
   let images: string[] = [];
   let videos: string[] = [];
+  let demoLink: string | undefined = undefined;
 
   // Encode project name for URL safety
   const encodedProjectName = encodeURIComponent(projectName);
@@ -36,7 +38,19 @@ function getProjectMedia(projectName: string): { images: string[], videos: strin
     console.log(`No video folder for ${projectName}`);
   }
 
-  return { images, videos };
+  // Read demo link from link.json
+  try {
+    if (fs.existsSync(linkFile)) {
+      const linkData = JSON.parse(fs.readFileSync(linkFile, 'utf-8'));
+      if (linkData.url && linkData.url.trim() !== '') {
+        demoLink = linkData.url.startsWith('http') ? linkData.url : `https://${linkData.url}`;
+      }
+    }
+  } catch (e) {
+    console.log(`No link.json or invalid format for ${projectName}`);
+  }
+
+  return { images, videos, demoLink };
 }
 
 export async function getRosterStats() {
@@ -98,7 +112,8 @@ export async function getRosterStats() {
           readme: "",
           url: "#",
           images: media.images,
-          videos: media.videos
+          videos: media.videos,
+          demoLink: media.demoLink
         }
       };
     });
@@ -137,13 +152,15 @@ export async function getRosterStats() {
           url: githubData.url,
           image: media.images[0] || extractedImg || localImg,
           images: media.images,
-          videos: media.videos
+          videos: media.videos,
+          demoLink: media.demoLink
         } : {
           description: "Repo not found",
           color: "#666",
           image: localImg,
           images: media.images,
-          videos: media.videos
+          videos: media.videos,
+          demoLink: media.demoLink
         }
       };
     }

@@ -29,19 +29,46 @@ export const TerminalPanel: React.FC<TerminalPanelProps> = ({
     onTogglePosition
 }) => {
     const scrollRef = useRef<HTMLDivElement>(null);
+    
+    // Detect if the page is in light mode by checking body background or data attribute
+    const [isDarkMode, setIsDarkMode] = React.useState(true);
+    
+    React.useEffect(() => {
+        // Check if body has light background
+        const checkTheme = () => {
+            const bodyBg = window.getComputedStyle(document.body).backgroundColor;
+            const isLight = bodyBg.includes('255, 255, 255') || bodyBg.includes('rgb(255, 255, 255)');
+            setIsDarkMode(!isLight);
+        };
+        checkTheme();
+        
+        // Listen for theme changes
+        const observer = new MutationObserver(checkTheme);
+        observer.observe(document.body, { attributes: true, attributeFilter: ['style', 'class'] });
+        
+        return () => observer.disconnect();
+    }, []);
 
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
     }, [terminalHistory, isLoading]);
+    
+    const terminalBg = isDarkMode ? '#1e1e1e' : '#f8f8f8';
+    const terminalHeaderBg = isDarkMode ? '#252526' : '#e8e8e8';
+    const terminalBorder = isDarkMode ? '#2d2d30' : '#d0d0d0';
+    const terminalText = isDarkMode ? '#cccccc' : '#333333';
+    const terminalMutedText = isDarkMode ? '#858585' : '#666666';
+    const terminalAccent = isDarkMode ? '#007acc' : '#0066b8';
+    const terminalPromptColor = isDarkMode ? '#4ec9b0' : '#098658';
 
     return (
-        <div className={`flex flex-col bg-[#1e1e1e] border-[#2d2d30] ${position === 'bottom' ? 'h-64 border-t' : 'h-full w-full'}`}>
-            <div className="h-9 bg-[#252526] flex items-center justify-between px-4 border-b border-[#2d2d30] shrink-0">
+        <div className={`flex flex-col border-[${terminalBorder}] ${position === 'bottom' ? 'h-64 border-t' : 'h-full w-full'}`} style={{ backgroundColor: terminalBg }}>
+            <div className="h-9 flex items-center justify-between px-4 border-b shrink-0" style={{ backgroundColor: terminalHeaderBg, borderColor: terminalBorder }}>
                 <div className="flex items-center gap-4 text-xs font-bold">
-                    <span className="text-white border-b border-[#007acc] h-9 flex items-center px-1">TERMINAL</span>
-                    <span className="text-[#858585] font-normal">bash</span>
+                    <span className="border-b h-9 flex items-center px-1" style={{ color: terminalText, borderColor: terminalAccent }}>TERMINAL</span>
+                    <span className="font-normal" style={{ color: terminalMutedText }}>bash</span>
                 </div>
                 <div className="flex gap-2">
                     <button
@@ -62,37 +89,38 @@ export const TerminalPanel: React.FC<TerminalPanelProps> = ({
 
             <div
                 ref={scrollRef}
-                className="flex-1 overflow-y-auto p-4 font-mono text-xs space-y-2 selection:bg-[#264f78]"
+                className="flex-1 overflow-y-auto p-4 font-mono text-xs space-y-2"
+                style={{ backgroundColor: terminalBg }}
             >
                 {terminalHistory.length === 0 && (
-                    <div className="text-[#858585]">
-                        <div className="text-blue-400">dixon@portfolio:~$ # AI Assistant Ready</div>
+                    <div style={{ color: terminalMutedText }}>
+                        <div style={{ color: terminalAccent }}>dixon@portfolio:~$ # AI Assistant Ready</div>
                         <div>dixon@portfolio:~$ # Ask me anything about Dixon's work...</div>
                     </div>
                 )}
                 {terminalHistory.map((msg, idx) => (
                     <div key={idx} className="animate-fadeIn">
                         {msg.role === 'user' ? (
-                            <div className="text-green-400">dixon@portfolio:~$ {msg.content}</div>
+                            <div style={{ color: terminalPromptColor }}>dixon@portfolio:~$ {msg.content}</div>
                         ) : (
-                            <div className="text-[#cccccc] whitespace-pre-wrap pl-2 border-l border-[#333] ml-1">
+                            <div className="whitespace-pre-wrap pl-2 border-l ml-1" style={{ color: terminalText, borderColor: isDarkMode ? '#333' : '#ccc' }}>
                                 {msg.content}
                             </div>
                         )}
                     </div>
                 ))}
                 {isLoading && (
-                    <div className="text-[#858585] ml-4 flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-[#007acc] rounded-full animate-bounce"></div>
-                        <div className="w-1.5 h-1.5 bg-[#007acc] rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                        <div className="w-1.5 h-1.5 bg-[#007acc] rounded-full animate-bounce [animation-delay:0.4s]"></div>
+                    <div className="ml-4 flex items-center gap-2" style={{ color: terminalMutedText }}>
+                        <div className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ backgroundColor: terminalAccent }}></div>
+                        <div className="w-1.5 h-1.5 rounded-full animate-bounce [animation-delay:0.2s]" style={{ backgroundColor: terminalAccent }}></div>
+                        <div className="w-1.5 h-1.5 rounded-full animate-bounce [animation-delay:0.4s]" style={{ backgroundColor: terminalAccent }}></div>
                     </div>
                 )}
             </div>
 
-            <form onSubmit={handleTerminalSubmit} className="border-t border-[#2d2d30] p-2 bg-[#1e1e1e]">
+            <form onSubmit={handleTerminalSubmit} className="border-t p-2" style={{ borderColor: terminalBorder, backgroundColor: terminalBg }}>
                 <div className="flex items-center gap-2">
-                    <span className="text-green-400 text-xs font-bold shrink-0">dixon@portfolio:~$</span>
+                    <span className="text-xs font-bold shrink-0" style={{ color: terminalPromptColor }}>dixon@portfolio:~$</span>
                     <input
                         type="text"
                         value={terminalInput}
@@ -119,7 +147,8 @@ export const TerminalPanel: React.FC<TerminalPanelProps> = ({
                                 }
                             }
                         }}
-                        className="flex-1 bg-transparent text-white text-xs outline-none font-mono placeholder:text-[#3c3c3c]"
+                        className="flex-1 bg-transparent text-xs outline-none font-mono"
+                        style={{ color: terminalText }}
                         placeholder="Ask Dixon's AI..."
                         autoFocus
                     />
