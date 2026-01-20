@@ -133,7 +133,7 @@ export async function getRosterStats() {
         Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
       },
       body: JSON.stringify({ query }),
-      next: { revalidate: 60 },
+      next: { revalidate: 3600 },  // 1 hour cache to avoid rate limits
     });
     json = await response.json();
     
