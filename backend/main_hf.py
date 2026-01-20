@@ -191,7 +191,21 @@ async def chat(request: ChatRequest):
     
     # Add project context if provided
     if request.project_context:
-        context = DIXON_CONTEXT + f"\n\nAdditional context about the project being viewed: {request.project_context}"
+        project_prompt = f"""
+
+---
+CURRENT PROJECT CONTEXT:
+The user is currently viewing one of Dixon's projects. Use this information to answer project-specific questions:
+
+{request.project_context}
+
+When answering questions about this project:
+- Reference specific details from the README if relevant
+- Explain technical choices and technologies used
+- Connect the project to Dixon's skills and experience
+---
+"""
+        context = DIXON_CONTEXT + project_prompt
     
     # Try all available models
     for model in MODELS:

@@ -498,7 +498,7 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
         setProjectAiSummary('');
 
         try {
-            const readmeSnippet = project.stats?.readme?.slice(0, 2000) || '';
+            const readmeSnippet = project.stats?.readme?.slice(0, 4000) || '';
             const projectDescription = project.stats?.description || project.display_name;
 
             const res = await fetch(API_CHAT_ENDPOINT, {
@@ -1294,7 +1294,7 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                                             headers: { 'Content-Type': 'application/json' },
                                                             body: JSON.stringify({
                                                                 message: msg,
-                                                                project_context: `Project: ${project.display_name}. Description: ${project.stats?.description || ''}. README: ${project.stats?.readme?.slice(0, 2000) || ''}`
+                                                                project_context: `Project: ${project.display_name}. Description: ${project.stats?.description || ''}. README: ${project.stats?.readme?.slice(0, 4000) || ''}`
                                                             })
                                                         });
                                                         const data = await res.json();
