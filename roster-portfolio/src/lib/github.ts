@@ -18,24 +18,35 @@ function getProjectMedia(projectName: string): { images: string[], videos: strin
   // Encode project name for URL safety
   const encodedProjectName = encodeURIComponent(projectName);
 
+  console.log(`[getProjectMedia] Processing: ${projectName}`);
+  console.log(`[getProjectMedia] Project dir: ${projectDir}`);
+  console.log(`[getProjectMedia] Images dir: ${imagesDir}`);
+  console.log(`[getProjectMedia] Images dir exists: ${fs.existsSync(imagesDir)}`);
+
   try {
     if (fs.existsSync(imagesDir)) {
-      images = fs.readdirSync(imagesDir)
+      const files = fs.readdirSync(imagesDir);
+      console.log(`[getProjectMedia] Found image files:`, files);
+      images = files
         .filter(f => /\.(jpg|jpeg|png|gif|webp)$/i.test(f))
         .map(f => `/project-media/${encodedProjectName}/images/${encodeURIComponent(f)}`);
+      console.log(`[getProjectMedia] Generated image paths:`, images);
     }
   } catch (e) {
-    console.log(`No images folder for ${projectName}`);
+    console.log(`No images folder for ${projectName}`, e);
   }
 
   try {
     if (fs.existsSync(videoDir)) {
-      videos = fs.readdirSync(videoDir)
+      const files = fs.readdirSync(videoDir);
+      console.log(`[getProjectMedia] Found video files:`, files);
+      videos = files
         .filter(f => /\.(mp4|webm|mov)$/i.test(f))
         .map(f => `/project-media/${encodedProjectName}/video/${encodeURIComponent(f)}`);
+      console.log(`[getProjectMedia] Generated video paths:`, videos);
     }
   } catch (e) {
-    console.log(`No video folder for ${projectName}`);
+    console.log(`No video folder for ${projectName}`, e);
   }
 
   // Read demo link from link.json
