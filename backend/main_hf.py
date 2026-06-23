@@ -1,3 +1,4 @@
+
 import os
 from typing import Optional
 from fastapi import FastAPI
@@ -30,12 +31,19 @@ app.add_middleware(
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 HF_TOKEN = os.getenv("HUGGINGFACEHUB_API_TOKEN")
 
-# Gemini models to try (primary)
+# Ollama Cloud (primary inference provider) — OpenAI-compatible endpoint, same
+# credentials RadAgents uses. gpt-oss by default.
+OLLAMA_CLOUD_API_KEY = os.getenv("OLLAMA_CLOUD_API_KEY")
+OLLAMA_CLOUD_URL = os.getenv("OLLAMA_CLOUD_URL", "https://ollama.com")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gpt-oss:120b")
+
+# Gemini models to try (fallback)
 GEMINI_MODELS = [
     "gemini-1.5-flash",
-    "gemini-1.5-flash-8b", 
+    "gemini-1.5-flash-8b",
     "gemini-2.0-flash",
 ]
+GEMINI_MODEL = GEMINI_MODELS[0]  # label used by the status endpoints
 
 # HuggingFace models (fallback)
 HF_MODELS = [
@@ -146,6 +154,47 @@ def clean_response(answer: str) -> Optional[str]:
     answer = answer.strip()
     
     return answer if len(answer) > 10 else None
+
+def query_ollama(user_message: str, system_prompt: str) -> tuple[Optional[str], Optional[str]]:
+    """Query Ollama Cloud via its OpenAI-compatible API. Returns (response, model_name)."""
+    if not OLLAMA_CLOUD_API_KEY:
+        print("[Ollama] No API key configured")
+        return None, None
+
+    try:
+        import requests
+
+        url = OLLAMA_CLOUD_URL.rstrip("/") + "/v1/chat/completions"
+        print(f"[Ollama] Trying model: {OLLAMA_MODEL}")
+        resp = requests.post(
+            url,
+            headers={
+                "Authorization": f"Bearer {OLLAMA_CLOUD_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": OLLAMA_MODEL,
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_message},
+                ],
+                "max_tokens": 500,
+                "temperature": 0.5,
+            },
+            timeout=60,
+        )
+        resp.raise_for_status()
+        answer = resp.json()["choices"][0]["message"]["content"]
+        answer = clean_response(answer)
+
+        if answer and len(answer) > 10:
+            print(f"[Ollama] Success with {OLLAMA_MODEL}: {answer[:100]}...")
+            return answer, OLLAMA_MODEL
+        return None, None
+
+    except Exception as e:
+        print(f"[Ollama] Error: {e}")
+        return None, None
 
 def query_gemini(user_message: str, system_prompt: str = None) -> tuple[Optional[str], Optional[str]]:
     """Query Google Gemini API using google-genai SDK. Returns (response, model_name)"""
@@ -289,11 +338,16 @@ When answering questions about this project:
 """
         context = DIXON_CONTEXT + project_prompt
     
-    # Try Gemini first (primary)
-    response = query_gemini(request.message, context)
+    # Try Ollama Cloud first (primary inference provider)
+    response, ollama_model = query_ollama(request.message, context)
     if response and len(response) > 30:
-        return {"response": response, "model": f"Gemini ({GEMINI_MODEL})"}
-    
+        return {"response": response, "model": f"Ollama ({ollama_model})"}
+
+    # Fall back to Gemini
+    response, gemini_model = query_gemini(request.message, context)
+    if response and len(response) > 30:
+        return {"response": response, "model": f"Gemini ({gemini_model or GEMINI_MODEL})"}
+
     # Fall back to HuggingFace models
     for model in HF_MODELS:
         response = query_hf_chat(request.message, context, model)
