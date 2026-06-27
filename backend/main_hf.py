@@ -1,3 +1,4 @@
+
 import os
 from typing import Optional
 from fastapi import FastAPI
@@ -30,12 +31,19 @@ app.add_middleware(
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 HF_TOKEN = os.getenv("HUGGINGFACEHUB_API_TOKEN")
 
-# Gemini models to try (primary)
+# Ollama Cloud (primary inference provider) — OpenAI-compatible endpoint, same
+# credentials RadAgents uses. gpt-oss by default.
+OLLAMA_CLOUD_API_KEY = os.getenv("OLLAMA_CLOUD_API_KEY")
+OLLAMA_CLOUD_URL = os.getenv("OLLAMA_CLOUD_URL", "https://ollama.com")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gpt-oss:120b")
+
+# Gemini models to try (fallback)
 GEMINI_MODELS = [
     "gemini-1.5-flash",
-    "gemini-1.5-flash-8b", 
+    "gemini-1.5-flash-8b",
     "gemini-2.0-flash",
 ]
+GEMINI_MODEL = GEMINI_MODELS[0]  # label used by the status endpoints
 
 # HuggingFace models (fallback)
 HF_MODELS = [
@@ -47,51 +55,54 @@ HF_MODELS = [
 # Full resume content as AI context
 RESUME_CONTENT = """
 Dixon Zor
-(267)-290-9734 | dixonzor@gmail.com | linkedin.com/in/dixon-zor | github.com/DixonzorCmpsi
+(267) 290-9734 | dixonzor@gmail.com | linkedin.com/in/dixon-zor | github.com/DixonzorCmpsi
 
 EDUCATION
-The Pennsylvania State University - Graduated: May 2025
-College of Engineering
-Bachelor of Science, Computer Science
+The Pennsylvania State University — University Park, PA
+Master of Science in Artificial Intelligence (World Campus), May 2026 – Present
+Bachelor of Science in Computer Science, College of Engineering, Graduated May 2025
 
-PROFESSIONAL EXPERIENCE
+EXPERIENCE
 
-Penn State Nittany AI Alliance
-AI Application Specialist - June 2025 – present (Penn State University Park)
-• Developed an automated student analytics dashboard using Azure Container Apps and Power BI, orchestrating data synchronization between SharePoint and the GitHub API via Power Automate.
-• Researched and documented technical requirements for Nittany AI Advance projects, creating implementation roadmaps for student teams to deliver on various projects deliverables (RAG, CNNs, PINNs) to partners including Lockheed Martin and West Shore Homes.
-• Implemented CI/CD pipelines using GitHub Actions to streamline the deployment of API server scripts, ensuring continuous integration and real-time updates for performance metrics.
-• Built an internal AI development framework to streamline the construction of complex AI pipelines for students, ranging from standard RAG architectures to advanced Context-Augmented Generation (CAG) with state management.
-• Developed a Python-based CLI tool to automate infrastructure provisioning across major cloud providers (AWS, Azure, GCP), standardizing deployment workflows for student developers.
-• Engineered an AI-driven code review system utilizing GitInjest for repository flattening and RAG for contextual analysis; reduced manual review time by over 50% through advanced prompt engineering.
-• Designed a multi-stage computer vision pipeline integrating Grounding DINO for object detection, SAM 2.1 for segmentation, and CLIP for semantic embedding comparisons.
+Radians Per Second Squared — State College, PA
+AI Engineer, Forward Deployed (March 2026 – Present)
+• Eliminated ~$47K/month in lost billing by replacing an oilfield operator's spreadsheets with one system of record.
+• Cut feedback-to-code cycle time 75% by auto-routing email feedback into GitHub issues and code PRs.
+• Architected RadAgents, a multi-agent orchestration harness (TypeScript, inference API, BAML) on AWS EKS.
+• Surfaced a $7,425/month revenue leak and a 58-hour-overdue engine service hidden in operational data.
+• Reclaimed 20–30 hrs/week by consolidating 3+ client engagements into a git-native web app (Python, HTMX).
+• Mapped 335 historical service events (2022–2026) across PM, work orders, delivery tickets, and field sales orders.
+• Authored internal Claude Code skills and MCP servers, cutting 5–10 hrs/week of QA and UX work.
 
-The Human in Computing and Cognition Research Lab
-Undergraduate Research Assistant - May 2023 – 2025 (Penn State University Park)
-• Designed 3 research environments with Minecraft Malmo, using Python, Java, and XML.
-• Conducted 25+ studies to model cognitive biases in human-AI interaction using ACT-R
-• Developed LLM chatbots for Engineering Competitions using Retrieval-Augmented Generation and Model Fine-Tuning with LoRA.
-• Created automated data processing and visualization pipelines for efficient data analysis and model evaluations.
-• Maintained code & research documentation with regular commits via GitLab.
-• Authored a paper detailing AI ethics and Chatbot developments, published by the American Society for Engineering Education (ASEE).
+Penn State Nittany AI Alliance — University Park, PA
+AI Application Specialist (June 2025 – 2026)
+• Launched a full-stack AI platform (BAML) that coached 500+ students through the $20K Nittany AI Challenge.
+• Automated 90% of new-student onboarding with a 3-step computer-vision pipeline (Grounding DINO, CLIP, SAM).
+• Compressed code-review time 75% with an AI workflow triaging 100+ Challenge students to 40+ for review.
+• Saved managers 80% of data-pull time by launching 3 dashboards on Power Automate, Power BI, and custom APIs.
+• Reduced deployment setup from 2 hrs to ~20 min with a standardized multi-cloud provisioning pipeline.
+• Hardened 5+ codebases/semester via pen-testing, prompt-injection, secrets scanning, and RBAC reviews.
+• Directed weekly engagements for 10+ clients including Lockheed Martin, John Deere, and Penn State OPP.
+• Taught 50–60 students monthly in workshops on MLOps, GitOps, and model fine-tuning.
 
-SKILLS/INTERESTS
-• Languages: JavaScript, Python, C, C++, MATLAB, SQL, HTML5, CSS, Assembly, Verilog
-• Frameworks: React, Node.js, Next.js, Flask, Bootstrap, Tailwind, Shadcn
-• Developer Tools: FastAPI, Flask, VScode, Git, GitHub, Power Automate, N8N, Docker, Jupyter, Azure, GCP, AWS, Postgres, MongoDB
-• Others: Teams, SharePoint, Video editing, Writing, Public speaking, Gym
+The Human in Computing and Cognition Research Lab — University Park, PA
+Undergraduate Research Assistant (May 2023 – 2025)
+• Designed 3 Minecraft Malmo environments (Python, Java, XML) for controlled human-AI interaction studies.
+• Conducted 25+ studies modeling cognitive biases in human-AI interaction with the ACT-R architecture.
+• Fine-tuned LLM chatbots for engineering competitions with RAG and LoRA adaptation.
+• Developed 3 data-processing and visualization pipelines in Python to accelerate analysis and model evaluation.
+• Co-authored a peer-reviewed paper on AI ethics and chatbot development, published by the ASEE.
 
-PROJECT EXPERIENCE
+PROJECTS
+Fantasy Football Prediction AI Web-App — Python, XGBoost, GCP, PostgreSQL (Oct 2025 – Present)
+• Trained 4 position-specific XGBoost models (lag features, walk-forward CV) to project NFL performance.
+• Outperformed ESPN's player projections ~70% of the time, landing closer to actual fantasy points.
 
-Fantasy Football Prediction AI web-app (Oct 2025 – Dec 2025)
-ML-Ops/Dev-OPS/Fine-tuning/Model Stacking
-• Developed a Stacked XGBoost Ensemble to predict NFL player performance (2012–2024), utilizing temporal lag features and Walk-Forward Validation to minimize MAE across position-specific inference pipelines.
-• Deployed a cron-scheduled ETL pipeline on GCP to ingest live weekly telemetry into PostgreSQL, establishing a scalable architecture for continuous model retraining and longitudinal data retention.
-
-Video Editing Tools (Aug 2025 – Sep 2025)
-User friendly tool stack for content creators
-• Developed and deployed a tool to download videos, audio, thumbnail and transcripts from social media using the ffmpeg library.
-• Developed and deployed a full-stack web application that truncates silences in raw video footage, saving editors the time required to cut long clips for productions.
+TECHNICAL SKILLS
+Languages: JavaScript, Python, C, C++, MATLAB, SQL, HTML5, CSS, Assembly, Verilog
+Frameworks: React, Node.js, Next.js, Flask, Bootstrap, Tailwind, shadcn/ui
+Developer Tools: FastAPI, VS Code, Git, GitHub, Power Automate, n8n, Docker, Jupyter, Azure, GCP, AWS, PostgreSQL, MongoDB
+Other: Microsoft Teams, SharePoint, video editing, writing, public speaking
 """
 
 DIXON_CONTEXT = f"""You are Dixon's AI assistant on his portfolio website. Answer questions about Dixon directly and concisely.
@@ -146,6 +157,47 @@ def clean_response(answer: str) -> Optional[str]:
     answer = answer.strip()
     
     return answer if len(answer) > 10 else None
+
+def query_ollama(user_message: str, system_prompt: str) -> tuple[Optional[str], Optional[str]]:
+    """Query Ollama Cloud via its OpenAI-compatible API. Returns (response, model_name)."""
+    if not OLLAMA_CLOUD_API_KEY:
+        print("[Ollama] No API key configured")
+        return None, None
+
+    try:
+        import requests
+
+        url = OLLAMA_CLOUD_URL.rstrip("/") + "/v1/chat/completions"
+        print(f"[Ollama] Trying model: {OLLAMA_MODEL}")
+        resp = requests.post(
+            url,
+            headers={
+                "Authorization": f"Bearer {OLLAMA_CLOUD_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": OLLAMA_MODEL,
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_message},
+                ],
+                "max_tokens": 500,
+                "temperature": 0.5,
+            },
+            timeout=60,
+        )
+        resp.raise_for_status()
+        answer = resp.json()["choices"][0]["message"]["content"]
+        answer = clean_response(answer)
+
+        if answer and len(answer) > 10:
+            print(f"[Ollama] Success with {OLLAMA_MODEL}: {answer[:100]}...")
+            return answer, OLLAMA_MODEL
+        return None, None
+
+    except Exception as e:
+        print(f"[Ollama] Error: {e}")
+        return None, None
 
 def query_gemini(user_message: str, system_prompt: str = None) -> tuple[Optional[str], Optional[str]]:
     """Query Google Gemini API using google-genai SDK. Returns (response, model_name)"""
@@ -289,11 +341,16 @@ When answering questions about this project:
 """
         context = DIXON_CONTEXT + project_prompt
     
-    # Try Gemini first (primary)
-    response = query_gemini(request.message, context)
+    # Try Ollama Cloud first (primary inference provider)
+    response, ollama_model = query_ollama(request.message, context)
     if response and len(response) > 30:
-        return {"response": response, "model": f"Gemini ({GEMINI_MODEL})"}
-    
+        return {"response": response, "model": f"Ollama ({ollama_model})"}
+
+    # Fall back to Gemini
+    response, gemini_model = query_gemini(request.message, context)
+    if response and len(response) > 30:
+        return {"response": response, "model": f"Gemini ({gemini_model or GEMINI_MODEL})"}
+
     # Fall back to HuggingFace models
     for model in HF_MODELS:
         response = query_hf_chat(request.message, context, model)

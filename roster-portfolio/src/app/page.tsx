@@ -12,38 +12,63 @@ export default async function Home() {
   // Experience data from resume
   const experiences = [
     {
+      company: "Radians Per Second Squared",
+      role: "AI Engineer, Forward Deployed",
+      period: "March 2026 – Present",
+      location: "State College, PA",
+      highlights: [
+        "Eliminated ~$47K/month in lost billing by replacing an oilfield operator's spreadsheets with one system of record",
+        "Cut feedback-to-code cycle time 75% by auto-routing email feedback into GitHub issues and code PRs",
+        "Architected RadAgents, a multi-agent orchestration harness (TypeScript, inference API, BAML) on AWS EKS",
+        "Surfaced a $7,425/month revenue leak and a 58-hour-overdue engine service hidden in operational data",
+        "Reclaimed 20–30 hrs/week by consolidating 3+ client engagements into a git-native web app (Python, HTMX)",
+        "Mapped 335 historical service events (2022–2026) across PM, work orders, delivery tickets, and field sales orders",
+        "Authored internal Claude Code skills and MCP servers, cutting 5–10 hrs/week of QA and UX work"
+      ]
+    },
+    {
       company: "Penn State Nittany AI Alliance",
       role: "AI Application Specialist",
-      period: "June 2025 – Present",
-      location: "Penn State University Park",
+      period: "June 2025 – 2026",
+      location: "University Park, PA",
       highlights: [
-        "Developed an automated student analytics dashboard using Azure Container Apps and Power BI, orchestrating data synchronization between SharePoint and the GitHub API via Power Automate",
-        "Researched and documented technical requirements for Nittany AI Advance projects, creating implementation roadmaps for student teams (RAG, CNNs, PINNs) for partners including Lockheed Martin and West Shore Homes",
-        "Implemented CI/CD pipelines using GitHub Actions to streamline deployment of API server scripts",
-        "Built an internal AI development framework for complex AI pipelines, from standard RAG to advanced Context-Augmented Generation (CAG) with state management",
-        "Developed a Python-based CLI tool to automate infrastructure provisioning across AWS, Azure, and GCP",
-        "Engineered an AI-driven code review system utilizing GitInjest and RAG, reducing manual review time by 50%",
-        "Designed a multi-stage computer vision pipeline integrating Grounding DINO, SAM 2.1, and CLIP for high-precision similarity matching"
+        "Launched a full-stack AI platform (BAML) that coached 500+ students through the $20K Nittany AI Challenge",
+        "Automated 90% of new-student onboarding with a 3-step computer-vision pipeline (Grounding DINO, CLIP, SAM)",
+        "Compressed code-review time 75% with an AI workflow triaging 100+ Challenge students to 40+ for review",
+        "Saved managers 80% of data-pull time by launching 3 dashboards on Power Automate, Power BI, and custom APIs",
+        "Reduced deployment setup from 2 hrs to ~20 min with a standardized multi-cloud provisioning pipeline",
+        "Hardened 5+ codebases/semester via pen-testing, prompt-injection, secrets scanning, and RBAC reviews",
+        "Directed weekly engagements for 10+ clients including Lockheed Martin, John Deere, and Penn State OPP",
+        "Taught 50–60 students monthly in workshops on MLOps, GitOps, and model fine-tuning"
       ]
     },
     {
       company: "The Human in Computing and Cognition Research Lab",
       role: "Undergraduate Research Assistant",
       period: "May 2023 – 2025",
-      location: "Penn State University Park",
+      location: "University Park, PA",
       highlights: [
-        "Designed 3 research environments with Minecraft Malmo, using Python, Java, and XML",
-        "Conducted 25+ studies to model cognitive biases in human-AI interaction using ACT-R",
-        "Developed LLM chatbots for Engineering Competitions using Retrieval-Augmented Generation and Model Fine-Tuning with LoRA",
-        "Created automated data processing and visualization pipelines for efficient data analysis and model evaluations",
-        "Maintained code & research documentation with regular commits via GitLab",
-        "Authored a paper detailing AI ethics and Chatbot developments, published by the American Society for Engineering Education (ASEE)"
+        "Designed 3 Minecraft Malmo environments (Python, Java, XML) for controlled human-AI interaction studies",
+        "Conducted 25+ studies modeling cognitive biases in human-AI interaction with the ACT-R architecture",
+        "Fine-tuned LLM chatbots for engineering competitions with RAG and LoRA adaptation",
+        "Developed 3 data-processing and visualization pipelines in Python to accelerate analysis and model evaluation",
+        "Co-authored a peer-reviewed paper on AI ethics and chatbot development, published by the ASEE"
       ]
     }
   ];
 
   // Education data from resume
   const education = [
+    {
+      institution: "The Pennsylvania State University",
+      college: "World Campus",
+      degree: "Master of Science",
+      field: "Artificial Intelligence",
+      period: "May 2026 – Present",
+      honors: [
+        "Graduate study in machine learning, deep learning, and applied AI systems"
+      ]
+    },
     {
       institution: "The Pennsylvania State University",
       college: "College of Engineering",
@@ -59,9 +84,9 @@ export default async function Home() {
   // Skills from resume
   const skills = {
     languages: ["JavaScript", "Python", "C", "C++", "MATLAB", "SQL", "HTML5", "CSS", "Assembly", "Verilog"],
-    frameworks: ["React", "Node.js", "Next.js", "Flask", "Bootstrap", "Tailwind", "Shadcn"],
-    tools: ["FastAPI", "Flask", "VScode", "Git", "GitHub", "Power Automate", "N8N", "Docker", "Jupyter", "Azure", "GCP", "AWS", "Postgres", "MongoDB"],
-    other: ["Teams", "SharePoint", "Video editing", "Writing", "Public speaking", "Gym"]
+    frameworks: ["React", "Node.js", "Next.js", "Flask", "Bootstrap", "Tailwind", "shadcn/ui"],
+    tools: ["FastAPI", "VS Code", "Git", "GitHub", "Power Automate", "n8n", "Docker", "Jupyter", "Azure", "GCP", "AWS", "PostgreSQL", "MongoDB"],
+    other: ["Microsoft Teams", "SharePoint", "Video editing", "Writing", "Public speaking"]
   };
 
   return (

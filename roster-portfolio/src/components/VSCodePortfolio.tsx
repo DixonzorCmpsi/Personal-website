@@ -33,7 +33,20 @@ import {
     Moon,
     Menu,
     PanelLeft,
-    MessageSquare
+    MessageSquare,
+    Link2,
+    Linkedin,
+    Github,
+    BrainCircuit,
+    BarChart3,
+    Dumbbell,
+    Puzzle,
+    Target,
+    Bot,
+    Loader2,
+    Palette,
+    Images,
+    Film
 } from 'lucide-react';
 
 interface VSCodePortfolioProps {
@@ -821,7 +834,7 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                     </div>
                                 )}
                                 {isSearching && (
-                                    <div className="text-[11px] text-[#969696] animate-pulse">🤖 AI thinking...</div>
+                                    <div className="text-[11px] text-[#969696] flex items-center gap-1.5"><Loader2 className="w-3 h-3 animate-spin" /> Thinking…</div>
                                 )}
                                 {searchAiResponse && !isSearching && (
                                     <div className="mt-3 p-3 bg-[#1e1e1e] rounded border border-[#3c3c3c]">
@@ -1032,11 +1045,11 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                 <div className="max-w-4xl">
                                     {/* Header Section */}
                                     <div className="mb-6 md:mb-8 pb-4 md:pb-6 border-b" style={{ borderColor: theme.border }}>
-                                        <h1 className="text-[24px] md:text-[36px] font-bold mb-2" style={{ color: theme.accent }}>
-                                            👋 Hi, I'm Dixon Zor
+                                        <h1 className="text-[24px] md:text-[36px] font-bold mb-2 tracking-tight" style={{ color: theme.accent }}>
+                                            Hi, I&apos;m Dixon Zor
                                         </h1>
                                         <p className="text-[14px] md:text-[18px] opacity-80" style={{ color: theme.text }}>
-                                            Computer Science Graduate | AI/ML Enthusiast | Problem Solver
+                                            AI Engineer · M.S. Artificial Intelligence @ Penn State · Problem Solver
                                         </p>
                                     </div>
 
@@ -1056,26 +1069,26 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
 
                                     {/* Quick Links Section */}
                                     <div className="mb-6 md:mb-8">
-                                        <h2 className="text-[18px] md:text-[22px] font-semibold mb-3 md:mb-4 flex items-center gap-2" style={{ color: theme.text }}>
-                                            <span className="text-[20px] md:text-[24px]">🔗</span>
+                                        <h2 className="text-[18px] md:text-[22px] font-semibold mb-3 md:mb-4 flex items-center gap-2.5" style={{ color: theme.text }}>
+                                            <Link2 className="w-5 h-5 md:w-6 md:h-6" style={{ color: theme.accent }} />
                                             Connect With Me
                                         </h2>
                                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
                                             {[
-                                                { icon: '📧', label: 'Email', value: 'dixonzor@gmail.com', href: 'mailto:dixonzor@gmail.com' },
-                                                { icon: '💼', label: 'LinkedIn', value: 'dixon-zor', href: 'https://linkedin.com/in/dixon-zor' },
-                                                { icon: '🐙', label: 'GitHub', value: 'DixonzorCmpsi', href: 'https://github.com/DixonzorCmpsi' },
+                                                { Icon: Mail, label: 'Email', value: 'dixonzor@gmail.com', href: 'mailto:dixonzor@gmail.com' },
+                                                { Icon: Linkedin, label: 'LinkedIn', value: 'dixon-zor', href: 'https://linkedin.com/in/dixon-zor' },
+                                                { Icon: Github, label: 'GitHub', value: 'DixonzorCmpsi', href: 'https://github.com/DixonzorCmpsi' },
                                             ].map(item => (
                                                 <a
                                                     key={item.label}
                                                     href={item.href}
                                                     target="_blank"
-                                                    className="p-3 md:p-4 rounded-lg border transition-all hover:scale-105"
+                                                    className="group p-3 md:p-4 rounded-lg border transition-[border-color,transform,box-shadow] duration-200 ease-out hover:-translate-y-0.5"
                                                     style={{ backgroundColor: theme.sidebar, borderColor: theme.border }}
                                                     onMouseEnter={(e) => e.currentTarget.style.borderColor = theme.accent}
                                                     onMouseLeave={(e) => e.currentTarget.style.borderColor = theme.border}
                                                 >
-                                                    <div className="text-[24px] md:text-[28px] mb-2">{item.icon}</div>
+                                                    <item.Icon className="w-6 h-6 md:w-7 md:h-7 mb-2.5 transition-colors" style={{ color: theme.accent }} strokeWidth={1.75} />
                                                     <div className="font-semibold text-[13px] md:text-[14px] mb-1" style={{ color: theme.text }}>{item.label}</div>
                                                     <div className="text-[11px] md:text-[12px] opacity-70 truncate" style={{ color: theme.text }}>{item.value}</div>
                                                 </a>
@@ -1085,23 +1098,25 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
 
                                     {/* Interests Section */}
                                     <div>
-                                        <h2 className="text-[18px] md:text-[22px] font-semibold mb-3 md:mb-4 flex items-center gap-2" style={{ color: theme.text }}>
-                                            <span className="text-[20px] md:text-[24px]">💡</span>
+                                        <h2 className="text-[18px] md:text-[22px] font-semibold mb-3 md:mb-4 flex items-center gap-2.5" style={{ color: theme.text }}>
+                                            <Target className="w-5 h-5 md:w-6 md:h-6" style={{ color: theme.accent }} />
                                             What Drives Me
                                         </h2>
                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
                                             {[
-                                                { emoji: '🤖', label: 'Machine Learning' },
-                                                { emoji: '🏈', label: 'NFL Analytics' },
-                                                { emoji: '💪', label: 'Fitness' },
-                                                { emoji: '🧩', label: 'Problem Solving' },
+                                                { Icon: BrainCircuit, label: 'Machine Learning' },
+                                                { Icon: BarChart3, label: 'NFL Analytics' },
+                                                { Icon: Dumbbell, label: 'Fitness' },
+                                                { Icon: Puzzle, label: 'Problem Solving' },
                                             ].map(item => (
                                                 <div
                                                     key={item.label}
-                                                    className="p-3 md:p-4 rounded-lg text-center border"
+                                                    className="p-4 md:p-5 rounded-lg text-center border flex flex-col items-center gap-2 transition-[border-color,transform] duration-200 ease-out hover:-translate-y-0.5"
                                                     style={{ backgroundColor: theme.sidebar, borderColor: theme.border }}
+                                                    onMouseEnter={(e) => e.currentTarget.style.borderColor = theme.accent}
+                                                    onMouseLeave={(e) => e.currentTarget.style.borderColor = theme.border}
                                                 >
-                                                    <div className="text-[24px] md:text-[32px] mb-1 md:mb-2">{item.emoji}</div>
+                                                    <item.Icon className="w-6 h-6 md:w-7 md:h-7" style={{ color: theme.accent }} strokeWidth={1.75} />
                                                     <div className="text-[11px] md:text-[13px] font-medium" style={{ color: theme.text }}>{item.label}</div>
                                                 </div>
                                             ))}
@@ -1309,7 +1324,7 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                                     <Activity className="w-4 h-4 text-[#007acc]" />
                                                     Project Summary
                                                     {isLoadingAiSummary && (
-                                                        <span className="text-[10px] text-[#007acc] animate-pulse ml-2">✨ AI generating...</span>
+                                                        <span className="text-[10px] text-[#007acc] ml-2 inline-flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> Generating…</span>
                                                     )}
                                                 </h3>
                                                 <div className="p-3 md:p-4 bg-[#252526] border border-[#3c3c3c] rounded-lg text-[#cccccc] text-[13px] md:text-[14px] leading-relaxed shadow-sm">
@@ -1349,7 +1364,7 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                             {(project.stats?.images?.length > 0 || project.stats?.videos?.length > 0) && (
                                                 <div className="mb-4 md:mb-6">
                                                     <h3 className="text-white text-[13px] md:text-[14px] font-medium mb-3 md:mb-4 flex items-center gap-2">
-                                                        📸 Project Media
+                                                        <Images className="w-4 h-4 text-[#007acc]" /> Project Media
                                                     </h3>
 
                                                     {/* Images */}
@@ -1383,8 +1398,8 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                                                         <source src={`/api${vid}`} type="video/mp4" />
                                                                         Your browser does not support the video tag.
                                                                     </video>
-                                                                    <div className="p-2 text-[10px] md:text-[11px] text-[#969696] bg-[#252526]">
-                                                                        📹 {vid.split('/').pop()?.replace(/%20/g, ' ')}
+                                                                    <div className="p-2 text-[10px] md:text-[11px] text-[#969696] bg-[#252526] flex items-center gap-1.5">
+                                                                        <Film className="w-3 h-3 shrink-0" /> {vid.split('/').pop()?.replace(/%20/g, ' ')}
                                                                     </div>
                                                                 </div>
                                                             ))}
@@ -1414,8 +1429,9 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                             <div className="flex-1 overflow-y-auto p-2 md:p-3 space-y-2 md:space-y-3" style={{ backgroundColor: theme.editor }}>
                                                 {projectChatHistory.length === 0 && (
                                                     <div className="text-[#969696] text-center text-[11px] md:text-[12px] mt-6 md:mt-10 px-3 md:px-4">
-                                                        <p className="mb-2">👋 Hi! I'm your AI context assistant.</p>
-                                                        <p>Ask me anything about <strong>{project.display_name}</strong>!</p>
+                                                        <Bot className="w-7 h-7 mx-auto mb-2.5 opacity-40" strokeWidth={1.5} />
+                                                        <p className="mb-2">Hi! I&apos;m your project assistant.</p>
+                                                        <p>Ask me anything about <strong>{project.display_name}</strong>.</p>
                                                     </div>
                                                 )}
                                                 {projectChatHistory.map((msg, i) => (
@@ -1510,8 +1526,9 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                                 ref={terminalRef}
                                 className="flex-1 overflow-y-auto p-2 font-mono text-[11px] md:text-[13px] bg-[#1e1e1e]"
                             >
-                                <div className="text-[#4ec9b0] mb-2">
-                                    👋 Hi! I'm Dixon's AI Assistant. Ask me anything about Dixon's skills, projects, or experience...
+                                <div className="text-[#4ec9b0] mb-2 flex items-start gap-1.5">
+                                    <Bot className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                                    <span>Hi! I&apos;m Dixon&apos;s AI assistant — ask me anything about his skills, projects, or experience…</span>
                                 </div>
                                 {terminalHistory.map((msg, i) => (
                                     <div key={i} className="mb-1">
@@ -1565,10 +1582,10 @@ export default function VSCodePortfolio({ qbData, rosterData, aboutText, experie
                     <span className="hidden md:inline">Spaces: 2</span>
                     <span className="hidden md:inline">UTF-8</span>
                     <span
-                        className="hover:bg-white/10 px-1 cursor-pointer"
+                        className="hover:bg-white/10 px-1 cursor-pointer inline-flex items-center gap-1"
                         onClick={() => setShowThemeMenu(!showThemeMenu)}
                     >
-                        🎨 <span className="hidden sm:inline">{themes[currentTheme].name}</span>
+                        <Palette className="w-3 h-3" /> <span className="hidden sm:inline">{themes[currentTheme].name}</span>
                     </span>
                     <button
                         onClick={() => setIsTerminalOpen(!isTerminalOpen)}
