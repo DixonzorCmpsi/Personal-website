@@ -13,17 +13,15 @@ export default async function Home() {
   const experiences = [
     {
       company: "Radians Per Second Squared",
-      role: "AI Engineer, Forward Deployed",
+      role: "AI Engineer",
       period: "March 2026 – Present",
       location: "State College, PA",
       highlights: [
-        "Eliminated ~$47K/month in lost billing by replacing an oilfield operator's spreadsheets with one system of record",
-        "Cut feedback-to-code cycle time 75% by auto-routing email feedback into GitHub issues and code PRs",
-        "Architected RadAgents, a multi-agent orchestration harness (TypeScript, inference API, BAML) on AWS EKS",
-        "Surfaced a $7,425/month revenue leak and a 58-hour-overdue engine service hidden in operational data",
+        "Eliminated $20K+/month in lost billing by moving clients from paper to an automated system of records",
+        "Surfaced $2,500K in revenue and a 58-hour-overdue engine service hidden in operational data",
         "Reclaimed 20–30 hrs/week by consolidating 3+ client engagements into a git-native web app (Python, HTMX)",
-        "Mapped 335 historical service events (2022–2026) across PM, work orders, delivery tickets, and field sales orders",
-        "Authored internal Claude Code skills and MCP servers, cutting 5–10 hrs/week of QA and UX work"
+        "Mapped 335 client services across equipment rentals, work orders, and delivery tickets into an AI-powered platform",
+        "Authored internal agentic coding skills and MCP servers, cutting 5–10 hrs/week of QA and UX work"
       ]
     },
     {
@@ -32,9 +30,9 @@ export default async function Home() {
       period: "June 2025 – 2026",
       location: "University Park, PA",
       highlights: [
-        "Launched a full-stack AI platform (BAML) that coached 500+ students through the $20K Nittany AI Challenge",
+        "Launched a full-stack AI platform (BAML) that coached 150+ students through the $20K Nittany AI Challenge",
         "Automated 90% of new-student onboarding with a 3-step computer-vision pipeline (Grounding DINO, CLIP, SAM)",
-        "Compressed code-review time 75% with an AI workflow triaging 100+ Challenge students to 40+ for review",
+        "Compressed code-review time 75% with an AI workflow triaging 100+ student codebases to 40 for review",
         "Saved managers 80% of data-pull time by launching 3 dashboards on Power Automate, Power BI, and custom APIs",
         "Reduced deployment setup from 2 hrs to ~20 min with a standardized multi-cloud provisioning pipeline",
         "Hardened 5+ codebases/semester via pen-testing, prompt-injection, secrets scanning, and RBAC reviews",
