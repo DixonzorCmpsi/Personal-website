@@ -55,56 +55,59 @@ HF_MODELS = [
 # Full resume content as AI context
 RESUME_CONTENT = """
 Dixon Zor
-(267) 290-9734 | dixonzor@gmail.com | linkedin.com/in/dixon-zor | github.com/DixonzorCmpsi
+State College, PA | (267) 290-9734 | dixonzor@gmail.com | linkedin.com/in/dixon-zor | github.com/DixonzorCmpsi
+
+SUMMARY
+AI Software Engineer building production ML systems from data pipelines and model development to cloud deployment. Experienced in applied ML, LLMs, computer vision, and agentic workflows that automate operations and drive measurable business outcomes.
 
 EDUCATION
-The Pennsylvania State University — University Park, PA
-Master of Science in Artificial Intelligence (World Campus), May 2026 – Present
+The Pennsylvania State University, University Park, PA
+Master of Science in Artificial Intelligence (World Campus), Expected May 2028
 Bachelor of Science in Computer Science, College of Engineering, Graduated May 2025
 
 EXPERIENCE
 
-Radians Per Second Squared — State College, PA
-AI Engineer (March 2026 – Present)
-• Eliminated $20K+/month in lost billing by moving clients from paper to an automated system of records.
-• Surfaced $2,500K in revenue and a 58-hour-overdue engine service hidden in operational data.
-• Reclaimed 20–30 hrs/week by consolidating 3+ client engagements into a git-native web app (Python, HTMX).
-• Mapped 335 client services across equipment rentals, work orders, and delivery tickets into an AI-powered platform.
-• Authored internal agentic coding skills and MCP servers, cutting 5–10 hrs/week of QA and UX work.
+Radians Per Second Squared (Applied-AI consultancy), State College, PA
+AI Software Engineer (March 2026 – Present)
+• Migrated a client from Excel to an AI-powered iOS platform, recovering $20K+/month in uncaptured revenue.
+• Led rollout across 10+ field and office staff, replacing spreadsheets with AI-driven daily operations.
+• Reduced equipment downtime ~30 hrs/month with an Isolation Forest anomaly-detection pipeline.
+• Applied PCA/SVD and K-means to prioritize the highest-risk ~10% of assets for preventive maintenance.
+• Delivered 3 production AI apps powering agentic workflows and daily ML automation in TypeScript, Python.
+• Built an internal client operations portal for 3+ clients, reducing management overhead by 10+ hrs/week.
 
-Penn State Nittany AI Alliance — University Park, PA
-AI Application Specialist (June 2025 – 2026)
-• Launched a full-stack AI platform (BAML) that coached 150+ students through the $20K Nittany AI Challenge.
-• Automated 90% of new-student onboarding with a 3-step computer-vision pipeline (Grounding DINO, CLIP, SAM).
-• Compressed code-review time 75% with an AI workflow triaging 100+ student codebases to 40 for review.
-• Saved managers 80% of data-pull time by launching 3 dashboards on Power Automate, Power BI, and custom APIs.
-• Reduced deployment setup from 2 hrs to ~20 min with a standardized multi-cloud provisioning pipeline.
-• Hardened 5+ codebases/semester via pen-testing, prompt-injection, secrets scanning, and RBAC reviews.
-• Directed weekly engagements for 10+ clients including Lockheed Martin, John Deere, and Penn State OPP.
-• Taught 50–60 students monthly in workshops on MLOps, GitOps, and model fine-tuning.
+Penn State Nittany AI Alliance, University Park, PA
+AI Application Specialist (June 2025 – March 2026)
+• Launched a full-stack AI platform (BAML) that coached 150+ students through a $20K coding competition.
+• Automated 90% of onboarding with a 3-step CV pipeline (Grounding DINO, CLIP, SAM, OpenCV).
+• Compressed code-review time 75% with gitingest + DSPy workflows triaging 100+ codebases to 40.
+• Reduced deployment setup from 2 hrs to ~20 min via an internal CLI tool for Azure/AWS.
+• Hardened 5+ codebases/semester with OWASP, secrets scanning, RBAC, and prompt-injection reviews.
+• Directed weekly engagements for 5+ clients including Lockheed Martin, John Deere, and Penn State OPP.
 
-The Human in Computing and Cognition Research Lab — University Park, PA
-Undergraduate Research Assistant (May 2023 – 2025)
+The Human in Computing and Cognition Research Lab, University Park, PA
+Undergraduate Research Assistant (May 2023 – May 2025)
 • Designed 3 Minecraft Malmo environments (Python, Java, XML) for controlled human-AI interaction studies.
 • Conducted 25+ studies modeling cognitive biases in human-AI interaction with the ACT-R architecture.
-• Fine-tuned LLM chatbots for engineering competitions with RAG and LoRA adaptation.
-• Developed 3 data-processing and visualization pipelines in Python to accelerate analysis and model evaluation.
+• Fine-tuned a T5 model with LoRA, benchmarked vs RAG, and presented findings to 50+ at PSU Hackathon.
+• Built 3 reproducible pandas/NumPy/scikit-learn pipelines for curation, cleaning, and model evaluation.
 • Co-authored a peer-reviewed paper on AI ethics and chatbot development, published by the ASEE.
 
 PROJECTS
-Rad Agent — TypeScript, BAML, AWS EKS (2026 – Present)
+Rad Agent | TypeScript, BAML, AWS EKS (2026 – Present)
 • Cut feedback-to-code cycle time 75% by auto-routing email feedback into GitHub issues and code PRs.
-• Created a multi-agent orchestration harness (TypeScript, inference API, BAML) on AWS EKS.
+• Engineered a multi-agent orchestration framework (TypeScript, BAML, inference APIs) on AWS EKS.
 
-Fantasy Football Prediction AI Web-App — Python, XGBoost, GCP, PostgreSQL (Oct 2025 – Present)
-• Trained 4 position-specific XGBoost models (lag features, walk-forward CV) to project NFL performance.
-• Outperformed ESPN's player projections ~70% of the time, landing closer to actual fantasy points.
+Fantasy Football Prediction AI Web-App | Python, XGBoost, GCP, PostgreSQL (Oct 2025 – Present)
+• Hand-coded and trained 4 position-specific XGBoost models on curated NFL data with walk-forward splits.
+• Automated a weekly GCP ETL pipeline retraining models on fresh results to match ESPN's fantasy predictions.
 
 TECHNICAL SKILLS
-Languages: JavaScript, Python, C, C++, MATLAB, SQL, HTML5, CSS, Assembly, Verilog
-Frameworks: React, Node.js, Next.js, Flask, Bootstrap, Tailwind, shadcn/ui
-Developer Tools: FastAPI, VS Code, Git, GitHub, Power Automate, n8n, Docker, Jupyter, Azure, GCP, AWS, PostgreSQL, MongoDB
-Other: Microsoft Teams, SharePoint, video editing, writing, public speaking
+Languages: Python, TypeScript, JavaScript, Swift, SQL, C/C++
+ML & AI: PyTorch, Hugging Face, scikit-learn, XGBoost, LoRA fine-tuning, RAG, PCA/SVD, K-means, CLIP, SAM
+LLM & Agents: LangChain/LlamaIndex, BAML, DSPy, multi-agent orchestration, MCP servers, context engineering
+Cloud & DevOps: AWS, Azure, GCP, Docker, Kubernetes, OpenTofu, Ansible, Git, n8n, Okta
+Data & Frameworks: data pipelines, PostgreSQL, pgvector, MongoDB, Databricks, FastAPI, Node.js, React, Next.js
 """
 
 DIXON_CONTEXT = f"""You are Dixon's AI assistant on his portfolio website. Answer questions about Dixon directly and concisely.
