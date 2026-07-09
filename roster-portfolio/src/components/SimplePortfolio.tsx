@@ -550,14 +550,14 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
             <span className="font-medium text-sky-700">Featured work</span>
           </button>
           <h1 className={`relative z-10 mt-10 w-full max-w-[330px] text-[44px] font-semibold leading-[0.98] tracking-tight sm:max-w-3xl sm:text-6xl md:max-w-5xl md:text-7xl lg:max-w-[1320px] lg:text-[84px] xl:text-[90px] ${isDark ? 'text-zinc-50' : 'text-zinc-950'}`}>
-            <span className="block sm:hidden">Build,</span>
-            <span className="block sm:hidden">build,</span>
-            <span className="block sm:hidden">build.</span>
+            <span className="block sm:hidden">BUILD,</span>
+            <span className="block sm:hidden">BUILD,</span>
+            <span className="block sm:hidden">BUILD.</span>
             <span className="block sm:hidden">AI,</span>
             <span className="block sm:hidden">automation,</span>
             <span className="block sm:hidden">and data</span>
             <span className="block sm:hidden">intelligence.</span>
-            <span className="hidden sm:block">Build, build, build.</span>
+            <span className="hidden sm:block">BUILD, BUILD, BUILD.</span>
             <span className="hidden sm:block">AI, automation, and data intelligence.</span>
           </h1>
           <p className="relative z-10 mt-7 w-full max-w-[330px] text-balance text-xl font-medium leading-[1.3] text-zinc-500 sm:max-w-3xl sm:text-2xl md:max-w-4xl md:text-3xl">
