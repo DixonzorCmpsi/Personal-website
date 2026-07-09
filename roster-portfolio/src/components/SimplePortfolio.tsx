@@ -151,9 +151,29 @@ function HeroPhotoFrame({
 
 function ProjectVideo({ project }: { project: PortfolioProject }) {
   const [videoState, setVideoState] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
+  const videoFrameRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const frame = videoFrameRef.current;
+    if (!frame) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldLoadVideo(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '900px 0px' }
+    );
+
+    observer.observe(frame);
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <div data-project-video className="relative mx-auto w-full max-w-[1480px]">
+    <div ref={videoFrameRef} data-project-video className="relative mx-auto w-full max-w-[1480px]">
       {videoState !== 'ready' && (
         <div className="absolute inset-2 z-10 flex items-center justify-center rounded-[24px] bg-[radial-gradient(circle_at_50%_20%,rgba(14,165,233,0.24),rgba(244,244,245,0.96)_54%)]">
           <div className="grid justify-items-center gap-3 text-center">
@@ -166,8 +186,8 @@ function ProjectVideo({ project }: { project: PortfolioProject }) {
       )}
       <video
         className={`block h-auto w-full shadow-[0_22px_70px_rgba(14,116,144,0.14)] transition-opacity duration-500 ${videoState === 'ready' ? 'opacity-100' : 'opacity-0'}`}
-        src={videoSrc(project)}
-        preload="auto"
+        src={shouldLoadVideo ? videoSrc(project) : undefined}
+        preload="metadata"
         autoPlay
         loop
         playsInline
@@ -367,16 +387,6 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  useEffect(() => {
-    projects.forEach((project) => {
-      const link = document.createElement('link');
-      link.rel = 'prefetch';
-      link.as = 'video';
-      link.href = videoSrc(project);
-      document.head.appendChild(link);
-    });
-  }, [projects]);
-
   if (isRestoringView) {
     return <PortfolioSkeleton />;
   }
@@ -453,7 +463,7 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
 
         {activeSection === 'home' && (
           <>
-        <section id="home" className="animate-fadeIn relative flex min-h-[560px] flex-col items-center justify-center pb-20 pt-10 text-center md:min-h-[620px]">
+        <section id="home" className="animate-fadeIn relative flex min-h-[calc(100svh-3rem)] flex-col items-center justify-center pb-20 pt-10 text-center">
           <HeroPhotoFrame
             src="/nittany-ai.jpeg"
             alt="Dixon at a Nittany AI prototype event"
@@ -492,9 +502,8 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
             <span className="block sm:hidden">Automation,</span>
             <span className="block sm:hidden">and Data</span>
             <span className="block sm:hidden">Intelligence.</span>
-            <span className="hidden sm:block xl:hidden">Ai, Automation, and Data</span>
-            <span className="hidden sm:block xl:hidden">Intelligence.</span>
-            <span className="hidden xl:block">Ai, Automation, and Data Intelligence.</span>
+            <span className="hidden sm:block">Ai, Automation, and Data</span>
+            <span className="hidden sm:block">Intelligence.</span>
           </h1>
           <p className="relative z-10 mt-7 w-full max-w-[330px] text-balance text-xl font-medium leading-[1.3] text-zinc-500 sm:max-w-3xl sm:text-2xl md:max-w-4xl md:text-3xl">
             I build practical AI systems, workflow tools, and ML products that turn messy operational work into useful software.
@@ -505,7 +514,7 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
           </button>
         </section>
 
-        <section className="-mt-8 scroll-mt-0">
+        <section className="scroll-mt-0">
           <div className="sr-only">
             <h2 className="text-4xl font-semibold tracking-tight text-zinc-950 md:text-6xl">Projects - Dixon Zor</h2>
           </div>

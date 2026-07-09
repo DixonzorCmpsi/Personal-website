@@ -54,7 +54,11 @@ export async function GET(
   const cacheHeaders = {
     "Accept-Ranges": "bytes",
     "Cache-Control": "public, max-age=31536000, immutable",
+    "CDN-Cache-Control": "public, max-age=31536000, immutable",
     "Content-Type": contentType,
+    "Content-Disposition": `inline; filename="${path.basename(absolutePath).replaceAll('"', "")}"`,
+    "Last-Modified": stat.mtime.toUTCString(),
+    "Vary": "Range",
   };
 
   if (range) {
@@ -88,6 +92,35 @@ export async function GET(
     headers: {
       ...cacheHeaders,
       "Content-Length": String(fileSize),
+    },
+  });
+}
+
+export async function HEAD(
+  request: NextRequest,
+  context: { params: Promise<{ file: string }> }
+) {
+  const { file } = await context.params;
+  const absolutePath = resolveVideo(file);
+
+  if (!absolutePath) {
+    return new NextResponse(null, { status: 404 });
+  }
+
+  const stat = fs.statSync(absolutePath);
+  const ext = path.extname(absolutePath).toLowerCase();
+  const contentType = CONTENT_TYPES[ext] || "application/octet-stream";
+
+  return new NextResponse(null, {
+    headers: {
+      "Accept-Ranges": "bytes",
+      "Cache-Control": "public, max-age=31536000, immutable",
+      "CDN-Cache-Control": "public, max-age=31536000, immutable",
+      "Content-Type": contentType,
+      "Content-Disposition": `inline; filename="${path.basename(absolutePath).replaceAll('"', "")}"`,
+      "Content-Length": String(stat.size),
+      "Last-Modified": stat.mtime.toUTCString(),
+      "Vary": "Range",
     },
   });
 }
