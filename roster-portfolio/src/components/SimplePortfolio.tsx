@@ -91,6 +91,17 @@ function videoSrc(project: PortfolioProject) {
   return `/api/portfolio-video/${encodeURIComponent(project.videoFile)}`;
 }
 
+function scrollProjectIntoView(projectId: string) {
+  const project = document.getElementById(projectId);
+  const video = project?.querySelector('[data-project-video]');
+  const target = video ?? project;
+  if (!target) return;
+
+  const topClearance = window.innerWidth < 768 ? 86 : 92;
+  const targetTop = target.getBoundingClientRect().top + window.scrollY - topClearance;
+  window.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+}
+
 function HeroPhotoFrame({
   src,
   alt,
@@ -124,9 +135,9 @@ function BlogVisual({ project, className = '' }: { project: PortfolioProject; cl
   const [videoState, setVideoState] = useState<'loading' | 'ready' | 'error'>('loading');
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative min-h-[320px] bg-zinc-950 md:h-full md:min-h-[430px] ${className}`}>
       {videoState !== 'ready' && (
-        <div className="absolute inset-2 z-10 flex items-center justify-center rounded-[24px] bg-[radial-gradient(circle_at_50%_20%,rgba(14,165,233,0.24),rgba(244,244,245,0.96)_54%)]">
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-[radial-gradient(circle_at_50%_20%,rgba(14,165,233,0.24),rgba(244,244,245,0.96)_54%)]">
           <div className="grid justify-items-center gap-3 text-center">
             <div className="h-9 w-9 animate-spin rounded-full border-2 border-sky-200 border-t-sky-700" />
             <div className="text-sm font-semibold text-zinc-600">
@@ -136,7 +147,7 @@ function BlogVisual({ project, className = '' }: { project: PortfolioProject; cl
         </div>
       )}
       <video
-        className={`block h-auto w-full shadow-[0_22px_70px_rgba(14,116,144,0.14)] transition-opacity duration-500 ${videoState === 'ready' ? 'opacity-100' : 'opacity-0'}`}
+        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${videoState === 'ready' ? 'opacity-100' : 'opacity-0'}`}
         src={videoSrc(project)}
         preload="auto"
         autoPlay
@@ -156,7 +167,7 @@ function ProjectVideo({ project }: { project: PortfolioProject }) {
   const [videoState, setVideoState] = useState<'loading' | 'ready' | 'error'>('loading');
 
   return (
-    <div className="relative mx-auto w-full max-w-[1480px]">
+    <div data-project-video className="relative mx-auto w-full max-w-[1480px]">
       {videoState !== 'ready' && (
         <div className="absolute inset-2 z-10 flex items-center justify-center rounded-[24px] bg-[radial-gradient(circle_at_50%_20%,rgba(14,165,233,0.24),rgba(244,244,245,0.96)_54%)]">
           <div className="grid justify-items-center gap-3 text-center">
@@ -201,8 +212,12 @@ function ProjectCard({
   const nextProjectId = nextProjectSlug ? `project-${nextProjectSlug}` : null;
 
   const scrollToNextProject = () => {
-    const target = nextProjectId ? document.getElementById(nextProjectId) : document.getElementById('home');
-    target?.scrollIntoView({ behavior: 'smooth', block: nextProjectId ? 'start' : 'center' });
+    if (nextProjectId) {
+      scrollProjectIntoView(nextProjectId);
+      return;
+    }
+
+    document.getElementById('home')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
   return (
@@ -306,7 +321,7 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
   };
 
   const scrollToProjects = () => {
-    document.getElementById(`project-${heroProject.slug}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    scrollProjectIntoView(`project-${heroProject.slug}`);
   };
 
   const navPillClass = (section: Exclude<PortfolioView, 'home'>, display = 'inline-flex') =>
@@ -632,7 +647,7 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
                       </h2>
                     </div>
 
-                    <article className="grid rounded-[30px] border border-zinc-200 bg-white/78 p-3 shadow-[0_30px_90px_rgba(14,116,144,0.10)] md:grid-cols-[0.92fr_1fr] md:p-4">
+                    <article className="grid overflow-hidden rounded-[30px] border border-zinc-200 bg-white/78 shadow-[0_30px_90px_rgba(14,116,144,0.10)] md:grid-cols-[0.92fr_1fr]">
                       <BlogVisual project={project} />
                       <div className="flex min-h-[300px] flex-col justify-center p-6 md:p-10">
                         <div className="flex flex-wrap items-center gap-4 text-sm font-semibold text-zinc-500 md:text-base">
