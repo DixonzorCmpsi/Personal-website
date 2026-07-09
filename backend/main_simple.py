@@ -1,5 +1,6 @@
 import os
-from fastapi import FastAPI
+from typing import Optional
+from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -7,6 +8,11 @@ from dotenv import load_dotenv
 load_dotenv(dotenv_path="../.env.local")
 
 app = FastAPI()
+CHAT_PROXY_SECRET = os.getenv("CHAT_PROXY_SECRET")
+
+def verify_chat_proxy_secret(x_chat_proxy_secret: Optional[str]) -> None:
+    if CHAT_PROXY_SECRET and x_chat_proxy_secret != CHAT_PROXY_SECRET:
+        raise HTTPException(status_code=403, detail="Chat must be accessed through the portfolio proxy.")
 
 # Allow Next.js (port 3000) to talk to Python (port 8000)
 app.add_middleware(
@@ -50,8 +56,10 @@ class ChatRequest(BaseModel):
     message: str
 
 @app.post("/api/chat")
-async def chat(request: ChatRequest):
+async def chat(request: ChatRequest, x_chat_proxy_secret: Optional[str] = Header(default=None)):
     """Simple rule-based chatbot for Dixon's portfolio"""
+    verify_chat_proxy_secret(x_chat_proxy_secret)
+
     message = request.message.lower()
     
     # Simple keyword-based responses

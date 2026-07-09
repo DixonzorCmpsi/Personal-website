@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Dixon Zor | Portfolio",
-  description: "Dixon Zor's developer portfolio - AI Application Specialist",
+  title: "Dixon Zor | AI Software Engineer",
+  description: "AI Software Engineer building production agents, ML systems, and full-stack automation.",
   icons: {
     icon: '/favicon.png',
     apple: '/favicon.png',

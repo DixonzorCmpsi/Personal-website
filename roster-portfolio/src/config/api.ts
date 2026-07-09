@@ -15,5 +15,5 @@ const getApiUrl = (): string => {
 };
 
 export const API_URL = getApiUrl();
-export const API_CHAT_ENDPOINT = `${API_URL}/api/chat`;
+export const API_CHAT_ENDPOINT = `/api/chat`;
 export const API_INGEST_ENDPOINT = `${API_URL}/api/ingest`;

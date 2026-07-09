@@ -1,19 +1,90 @@
 "use client";
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Loader2, Plus, Send, ShieldCheck } from 'lucide-react';
 import { API_CHAT_ENDPOINT } from '@/config/api';
+import { CHAT_LIMIT, CHAT_USAGE_EVENT, publishRemainingTurns, readStoredRemaining } from '@/lib/chatUsage';
+import {
+    appendChatMessage,
+    PortfolioChatMessage,
+    readChatMessages,
+    replaceLastAssistantMessage,
+    setChatMessages,
+    subscribeToChatMessages,
+} from '@/lib/chatSession';
+
+const sampleQuestions = [
+    'What project best proves you can ship production AI?',
+    'Summarize your work in 30 seconds.',
+    'What should I ask you in an interview?',
+    'Which project should I watch first?',
+];
 
 export default function GlobalChat() {
     const [input, setInput] = useState("");
-    const [messages, setMessages] = useState<{ role: string, content: string }[]>([]);
+    const [messages, setMessagesState] = useState<PortfolioChatMessage[]>(() => readChatMessages());
     const [isLoading, setIsLoading] = useState(false);
-    const [isExpanded, setIsExpanded] = useState(false);
+    const [isRevealing, setIsRevealing] = useState(false);
+    const [remainingTurns, setRemainingTurns] = useState(CHAT_LIMIT);
+    const scrollAreaRef = useRef<HTMLDivElement | null>(null);
+    const revealTimerRef = useRef<number | null>(null);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!input.trim()) return;
+    useEffect(() => {
+        setRemainingTurns(readStoredRemaining());
 
-        const newMessages = [...messages, { role: 'user', content: input }];
-        setMessages(newMessages);
+        const handleUsage = (event: Event) => {
+            const detail = (event as CustomEvent<number>).detail;
+            if (typeof detail === 'number') setRemainingTurns(detail);
+        };
+
+        window.addEventListener(CHAT_USAGE_EVENT, handleUsage);
+        const unsubscribe = subscribeToChatMessages(setMessagesState);
+        const interval = window.setInterval(() => setRemainingTurns(readStoredRemaining()), 30000);
+
+        return () => {
+            window.removeEventListener(CHAT_USAGE_EVENT, handleUsage);
+            window.clearInterval(interval);
+            unsubscribe();
+            if (revealTimerRef.current) window.clearInterval(revealTimerRef.current);
+        };
+    }, []);
+
+    useEffect(() => {
+        const element = scrollAreaRef.current;
+        if (!element) return;
+        element.scrollTo({ top: element.scrollHeight, behavior: 'smooth' });
+    }, [messages, isLoading, isRevealing]);
+
+    const revealAssistantResponse = (content: string) =>
+        new Promise<void>((resolve) => {
+            const cleanContent = content.trim();
+            appendChatMessage({ role: 'assistant', content: '' });
+            setIsRevealing(true);
+
+            let index = 0;
+            revealTimerRef.current = window.setInterval(() => {
+                index = Math.min(cleanContent.length, index + Math.max(8, Math.ceil(cleanContent.length / 45)));
+                replaceLastAssistantMessage(cleanContent.slice(0, index));
+
+                if (index >= cleanContent.length) {
+                    if (revealTimerRef.current) window.clearInterval(revealTimerRef.current);
+                    revealTimerRef.current = null;
+                    setIsRevealing(false);
+                    resolve();
+                }
+            }, 24);
+        });
+
+    const askQuestion = async (question: string) => {
+        const trimmedQuestion = question.trim();
+        const currentMessages = readChatMessages();
+        if (!trimmedQuestion || isLoading || isRevealing || remainingTurns === 0) return;
+
+        const newMessages: PortfolioChatMessage[] = [...currentMessages, { role: 'user', content: trimmedQuestion }];
+        const conversationContext = currentMessages
+            .slice(-8)
+            .map((message) => `${message.role === 'user' ? 'Visitor' : 'Me'}: ${message.content}`)
+            .join('\n');
+        setChatMessages(newMessages);
         setInput("");
         setIsLoading(true);
 
@@ -21,93 +92,121 @@ export default function GlobalChat() {
             const res = await fetch(API_CHAT_ENDPOINT, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: input })
+                body: JSON.stringify({
+                    message: trimmedQuestion,
+                    conversationContext,
+                    pageContext: conversationContext
+                        ? `Use this temporary in-session chat context. Do not assume it persists after reload.\n${conversationContext}`
+                        : "This is a fresh in-session chat with my portfolio.",
+                })
             });
             const data = await res.json();
-            setMessages([...newMessages, { role: 'assistant', content: data.response }]);
-        } catch (err) {
-            setMessages([...newMessages, { role: 'assistant', content: "Coach is offline. Check backend." }]);
+            const remaining = res.headers.get('x-ratelimit-remaining');
+            const resetSeconds = res.headers.get('x-ratelimit-reset');
+            if (remaining !== null) publishRemainingTurns(Number(remaining), resetSeconds ? Number(resetSeconds) : undefined);
+            setIsLoading(false);
+            await revealAssistantResponse(data.response || data.error || 'No response returned.');
+        } catch {
+            setIsLoading(false);
+            await revealAssistantResponse("The portfolio chat is offline right now.");
         } finally {
             setIsLoading(false);
         }
     };
 
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        await askQuestion(input);
+    };
+
     return (
-        <div
-            onMouseEnter={() => setIsExpanded(true)}
-            onMouseLeave={() => setIsExpanded(false)}
-            className={`relative w-full transition-all duration-700 ease-in-out flex flex-col overflow-hidden group
-                ${isExpanded ? 'h-[400px] opacity-100' : 'h-[60px] opacity-40 hover:opacity-100'}`}
-        >
-            {/* Header / Trigger Bar */}
-            <div className="bg-white/5 px-6 py-4 flex justify-between items-center border-b border-white/10 cursor-pointer">
-                <div className="flex items-center gap-3">
-                    <div className={`w-2 h-2 rounded-full bg-blue-500 ${isLoading ? 'animate-ping' : 'animate-pulse'}`}></div>
-                    <span className="text-[10px] font-black text-white/70 tracking-[0.3em] uppercase italic">
-                        AI Recruiting Assistant v2.0
-                    </span>
-                </div>
-                {!isExpanded && (
-                    <span className="text-[10px] text-blue-400 font-bold uppercase tracking-widest animate-pulse">
-                        [ Hover to Initialize ]
-                    </span>
-                )}
-                {isExpanded && <span className="text-[9px] text-white/20 font-bold uppercase tracking-widest italic">Connection Stable</span>}
-            </div>
+        <div className="relative flex h-[calc(100vh-92px)] min-h-[560px] w-full flex-col justify-end overflow-hidden px-4 pb-7 pt-20 md:px-8 md:pb-8">
+            <div className="hero-blue-field pointer-events-none absolute inset-x-[-10vw] top-[-120px] h-[520px]" />
+            <div className="hero-pulse-band pointer-events-none absolute left-1/2 top-[70px] h-72 w-[76vw]" />
+            <div className="hero-blue-sweep pointer-events-none absolute left-1/2 top-[104px] h-52 w-[82vw] -translate-x-1/2" />
 
-            {/* Messages - Only visible when expanded enough */}
-            <div className={`flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar transition-opacity duration-500 ${isExpanded ? 'opacity-100' : 'opacity-0'}`}>
-                {messages.length === 0 && (
-                    <div className="h-full flex flex-col items-center justify-center text-white/10 text-center">
-                        <div className="text-6xl mb-4 grayscale opacity-10 transform group-hover:scale-110 transition-transform">🤖</div>
-                        <p className="text-[10px] uppercase font-black tracking-[0.4em]">Initialize Transmission...</p>
-                        <p className="text-[8px] text-white/20 uppercase tracking-widest mt-2">Ask about my experience, skills, or projects</p>
-                    </div>
-                )}
-                {messages.map((m, i) => (
-                    <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[85%] rounded-2xl px-5 py-3 text-sm transition-all duration-300 ${m.role === 'user'
-                            ? 'bg-blue-600/30 text-blue-100 border border-blue-500/30 shadow-[0_4px_15px_rgba(37,99,235,0.2)]'
-                            : 'bg-white/10 text-slate-100 border border-white/10'
-                            }`}>
-                            <div className="text-[8px] uppercase font-black mb-1 opacity-40 tracking-widest">
-                                {m.role === 'user' ? 'Recruiter' : 'AI Core'}
+            <div className="relative mx-auto flex h-full w-full max-w-5xl flex-col justify-end">
+                <div ref={scrollAreaRef} className="min-h-0 flex-1 space-y-4 overflow-y-auto px-1 pb-6 pt-4">
+                    {messages.length === 0 && (
+                        <div className="flex h-full min-h-[220px] items-center justify-center text-center">
+                            <div>
+                                <h3 className="text-4xl font-semibold tracking-tight text-zinc-950 md:text-6xl">Ask me a question.</h3>
+                                <p className="mx-auto mt-4 max-w-2xl text-base font-medium leading-7 text-zinc-500 md:text-lg">
+                                    Ask about my projects, stack, experience, fit, or what to watch first.
+                                </p>
                             </div>
-                            {m.content}
                         </div>
-                    </div>
-                ))}
-                {isLoading && (
-                    <div className="flex items-center gap-2 text-blue-400 text-[10px] font-black uppercase tracking-widest animate-pulse ml-2">
-                        <span>// ANALYZING DATA</span>
-                        <div className="flex gap-1">
-                            <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce"></div>
-                            <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                            <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce [animation-delay:0.4s]"></div>
-                        </div>
-                    </div>
-                )}
-            </div>
+                    )}
 
-            {/* Input - Always visible but dimmed when collapsed */}
-            <form onSubmit={handleSubmit} className={`p-4 bg-black/20 border-t border-white/5 transition-opacity duration-500 ${isExpanded ? 'opacity-100' : 'opacity-30'}`}>
-                <div className="flex gap-3">
-                    <input
-                        className="flex-1 bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-white text-xs font-medium focus:outline-none focus:border-blue-500/50 transition-all placeholder-white/20"
-                        placeholder={isExpanded ? "Type your inquiry..." : "..."}
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onFocus={() => setIsExpanded(true)}
-                    />
-                    <button
-                        type="submit"
-                        disabled={isLoading || !input.trim()}
-                        className="bg-white text-black hover:bg-blue-500 hover:text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all disabled:opacity-20 shadow-lg"
-                    >
-                        SEND
-                    </button>
+                    {messages.map((message, index) => (
+                        <div key={`${message.role}-${index}-${message.content}`} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                            <div className={`max-w-[86%] rounded-[26px] px-5 py-3 text-base leading-7 shadow-sm md:max-w-[72%] ${
+                                message.role === 'user'
+                                    ? 'bg-zinc-950 text-white'
+                                    : 'border border-zinc-200 bg-white/82 text-zinc-800 backdrop-blur'
+                            }`}>
+                                {message.content}
+                            </div>
+                        </div>
+                    ))}
+
+                    {isLoading && (
+                        <div className="flex justify-start">
+                            <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-500">
+                                <Loader2 size={15} className="animate-spin" />
+                                Working
+                            </div>
+                        </div>
+                    )}
                 </div>
-            </form>
+
+                <form onSubmit={handleSubmit} className="rounded-[30px] border border-zinc-200 bg-white/82 p-2 shadow-[0_22px_60px_rgba(24,24,27,0.10)] backdrop-blur-xl">
+                    <div className="flex items-center gap-2">
+                        <button
+                            type="button"
+                            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[22px] bg-zinc-50 text-zinc-950 transition hover:bg-zinc-100"
+                            aria-label="Sample questions"
+                            onClick={() => setInput(sampleQuestions[0])}
+                        >
+                            <Plus size={24} />
+                        </button>
+                        <input
+                            className="min-w-0 flex-1 bg-transparent px-2 text-lg font-medium text-zinc-950 outline-none placeholder:text-zinc-400"
+                            placeholder={remainingTurns === 0 ? "Hourly limit reached" : "Ask me a question"}
+                            value={input}
+                            maxLength={1600}
+                            onChange={(e) => setInput(e.target.value)}
+                        />
+                        <button
+                            type="submit"
+                            disabled={isLoading || isRevealing || !input.trim() || remainingTurns === 0}
+                            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[22px] bg-zinc-50 text-zinc-950 transition hover:bg-zinc-100 disabled:opacity-35"
+                            aria-label="Send message"
+                        >
+                            <Send size={24} />
+                        </button>
+                    </div>
+                </form>
+
+                <div className="mt-4 flex flex-wrap justify-center gap-2">
+                    {sampleQuestions.map((question) => (
+                        <button
+                            key={question}
+                            type="button"
+                            onClick={() => askQuestion(question)}
+                            disabled={isLoading || isRevealing || remainingTurns === 0}
+                            className="rounded-full border border-zinc-200 bg-white/72 px-4 py-2 text-sm font-medium text-zinc-600 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:text-zinc-950 disabled:opacity-40"
+                        >
+                            {question}
+                        </button>
+                    ))}
+                </div>
+
+                <div className="mt-4 flex items-center justify-center gap-2 text-xs font-semibold text-zinc-500">
+                    <ShieldCheck size={14} className="text-emerald-600" />
+                    {remainingTurns}/{CHAT_LIMIT} questions left this hour
+                </div>
+            </div>
         </div>
     );
 }

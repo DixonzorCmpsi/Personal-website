@@ -4,6 +4,41 @@ import path from 'path';
 
 const GITHUB_GRAPHQL_API = "https://api.github.com/graphql";
 
+type RosterEntry = {
+  display_name: string;
+  url?: string;
+  [key: string]: unknown;
+};
+
+function fallbackRosterData(roster: RosterEntry[], reason: string) {
+  if (process.env.NODE_ENV !== "production") {
+    console.warn(`[GitHub] ${reason}. Rendering local fallback data.`);
+  }
+
+  const fallbackRoster = roster.map((p, index) => {
+    const media = getProjectMedia(p.display_name);
+    return {
+      ...p,
+      stats: {
+        description: `Portfolio project: ${p.display_name}`,
+        stars: index,
+        language: "TypeScript",
+        color: "#2563eb",
+        readme: "",
+        url: p.url || "#",
+        images: media.images,
+        videos: media.videos,
+        demoLink: media.demoLink
+      }
+    };
+  });
+
+  return {
+    qb: { name: "Dixon Zor", avatarUrl: "/profile.jpg", resumeUrl: "/resume.pdf" },
+    roster: fallbackRoster
+  };
+}
+
 // Function to get project media files and demo link from local folders
 function getProjectMedia(projectName: string): { images: string[], videos: string[], demoLink?: string } {
   // Try multiple possible base paths (for local dev and Docker)
@@ -98,6 +133,7 @@ function getProjectMedia(projectName: string): { images: string[], videos: strin
 
 export async function getRosterStats() {
   const { github_username, roster } = config;
+  const githubToken = process.env.GITHUB_TOKEN;
 
   // 1. Filter: Only fetch data for "repo" types
   const repoPlayers = roster.filter(p => p.type === "repo");
@@ -123,6 +159,10 @@ export async function getRosterStats() {
     }
   `;
 
+  if (!githubToken) {
+    return fallbackRosterData(roster, "GITHUB_TOKEN is not set");
+  }
+
   // 3. Fetch Data
   let json: any = {};
   try {
@@ -130,46 +170,27 @@ export async function getRosterStats() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+        Authorization: `Bearer ${githubToken}`,
       },
       body: JSON.stringify({ query }),
       next: { revalidate: 3600 },  // 1 hour cache to avoid rate limits
     });
     json = await response.json();
     
-    if (json.errors) {
-      console.error("GitHub GraphQL Errors:", JSON.stringify(json.errors, null, 2));
+    if (!response.ok || json.errors) {
+      console.warn("[GitHub] GraphQL request did not return usable data:", {
+        status: response.status,
+        errors: json.errors,
+      });
     }
     
     console.log("GitHub API Response received:", json.data ? "Success" : "No data");
   } catch (e) {
-    console.error("Fetch failed:", e);
+    console.warn("[GitHub] Fetch failed:", e);
   }
 
   if (!json.data) {
-    console.error("GitHub Error or No Data, providing mock data for layout visualization");
-    // Return mock data so the user can see the layout
-    const mockRoster = roster.map((p: any) => {
-      const media = getProjectMedia(p.display_name);
-      return {
-        ...p,
-        stats: {
-          description: "This is a placeholder description for " + p.display_name,
-          stars: Math.floor(Math.random() * 100),
-          language: "TypeScript",
-          color: "#2563eb",
-          readme: "",
-          url: "#",
-          images: media.images,
-          videos: media.videos,
-          demoLink: media.demoLink
-        }
-      };
-    });
-    return {
-      qb: { name: "Dixon Zor", avatarUrl: "/profile.jpg", resumeUrl: "/resume.pdf" },
-      roster: mockRoster
-    };
+    return fallbackRosterData(roster, "GitHub returned no data");
   }
 
   // 4. Merge Data (Handle both Repos and Links)

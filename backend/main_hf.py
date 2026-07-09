@@ -1,7 +1,7 @@
 
 import os
 from typing import Optional
-from fastapi import FastAPI
+from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -30,6 +30,11 @@ app.add_middleware(
 # API Keys
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 HF_TOKEN = os.getenv("HUGGINGFACEHUB_API_TOKEN")
+CHAT_PROXY_SECRET = os.getenv("CHAT_PROXY_SECRET")
+
+def verify_chat_proxy_secret(x_chat_proxy_secret: Optional[str]) -> None:
+    if CHAT_PROXY_SECRET and x_chat_proxy_secret != CHAT_PROXY_SECRET:
+        raise HTTPException(status_code=403, detail="Chat must be accessed through the portfolio proxy.")
 
 # Ollama Cloud (primary inference provider) — OpenAI-compatible endpoint, same
 # credentials RadAgents uses. gpt-oss by default.
@@ -324,8 +329,10 @@ async def test_models():
     }
 
 @app.post("/api/chat")
-async def chat(request: ChatRequest):
+async def chat(request: ChatRequest, x_chat_proxy_secret: Optional[str] = Header(default=None)):
     """Chat endpoint - Gemini primary, HuggingFace fallback"""
+    verify_chat_proxy_secret(x_chat_proxy_secret)
+
     context = DIXON_CONTEXT
     
     # Add project context if provided

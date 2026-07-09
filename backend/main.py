@@ -3,7 +3,7 @@ print("🚀 BACKEND STARTING...")
 import json
 import requests
 from typing import List, Optional
-from fastapi import FastAPI, HTTPException, Body
+from fastapi import FastAPI, HTTPException, Body, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -33,6 +33,11 @@ app.add_middleware(
 GITHUB_GRAPHQL_API = "https://api.github.com/graphql"
 INDEX_NAME = os.getenv("PINECONE_INDEX_NAME")
 HF_TOKEN = os.getenv("HUGGINGFACEHUB_API_TOKEN")
+CHAT_PROXY_SECRET = os.getenv("CHAT_PROXY_SECRET")
+
+def verify_chat_proxy_secret(x_chat_proxy_secret: Optional[str]) -> None:
+    if CHAT_PROXY_SECRET and x_chat_proxy_secret != CHAT_PROXY_SECRET:
+        raise HTTPException(status_code=403, detail="Chat must be accessed through the portfolio proxy.")
 
 # Global variables for models (lazy loaded)
 _embeddings = None
@@ -180,7 +185,9 @@ class ChatRequest(BaseModel):
     message: str
 
 @app.post("/api/chat")
-async def chat(request: ChatRequest):
+async def chat(request: ChatRequest, x_chat_proxy_secret: Optional[str] = Header(default=None)):
+    verify_chat_proxy_secret(x_chat_proxy_secret)
+
     try:
         # Connect to existing index
         vectorstore = get_pinecone_store(INDEX_NAME, get_embeddings())
