@@ -816,7 +816,7 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
 
                 <a href={youtubeChannelUrl} target="_blank" rel="noreferrer" className="group grid overflow-hidden rounded-[30px] border border-zinc-200 bg-white/78 p-3 shadow-[0_30px_90px_rgba(14,116,144,0.10)] transition hover:-translate-y-1 md:grid-cols-[1.25fr_0.75fr]">
                   <div className="relative aspect-[2/1] overflow-hidden rounded-[24px] bg-white md:aspect-[2/1]">
-                    <Image src="/deetalk-channel.png" alt="DeeTalk YouTube channel screenshot" fill className="object-cover object-top" sizes="(min-width: 768px) 760px, 100vw" />
+                    <Image src="/deetalk-channel.png" alt="DeeTalk YouTube channel screenshot" fill className="object-cover object-left-top" sizes="(min-width: 768px) 760px, 100vw" />
                   </div>
                   <div className="flex flex-col justify-center p-6 md:p-10">
                     <div className="inline-flex w-fit items-center gap-2 rounded-full border border-red-100 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700">
