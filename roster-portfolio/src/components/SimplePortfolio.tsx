@@ -483,14 +483,14 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
             alt="Dixon with an undergraduate research lab group"
             width={250}
             height={141}
-            className="right-0 top-[360px] z-0 w-44 rotate-6 hover:-translate-x-1 hover:-translate-y-2 2xl:right-8 2xl:top-[340px] 2xl:w-56"
+            className="right-0 top-[400px] z-0 w-40 rotate-6 hover:-translate-x-1 hover:-translate-y-2 2xl:right-0 2xl:top-[470px] 2xl:w-48"
           />
           <HeroPhotoFrame
             src="/nittany-ai-images.jpeg"
             alt="Dixon at a Nittany AI classroom session"
             width={1024}
             height={512}
-            className="left-4 top-[410px] z-0 w-48 rotate-3 hover:-translate-y-2 hover:translate-x-1 2xl:left-16 2xl:top-[430px] 2xl:w-64"
+            className="left-4 top-[470px] z-0 w-44 rotate-3 hover:-translate-y-2 hover:translate-x-1 2xl:left-0 2xl:top-[560px] 2xl:w-52"
           />
           <button type="button" onClick={() => switchView('work')} className="hero-pill-glint relative z-10 inline-flex items-center overflow-hidden rounded-full border border-sky-300/90 bg-white/82 px-5 py-3 text-base font-semibold text-sky-950 shadow-[0_18px_48px_rgba(14,165,233,0.24),inset_0_0_0_1px_rgba(255,255,255,0.74),inset_0_-18px_36px_rgba(186,230,253,0.46)] backdrop-blur-xl transition hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-sky-200">
             <span>Dixon Zor</span>
