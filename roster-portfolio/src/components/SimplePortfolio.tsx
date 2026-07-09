@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from 'react';
 import {
   ArrowUp,
   ArrowUpRight,
-  BookOpen,
   CalendarDays,
   ChevronRight,
   ChevronUp,
@@ -46,9 +45,9 @@ type Education = {
   honors: string[];
 };
 
-type PortfolioView = 'home' | 'about' | 'work' | 'education' | 'blog' | 'meet' | 'chat';
+type PortfolioView = 'home' | 'about' | 'work' | 'education' | 'meet' | 'chat';
 
-const portfolioViews: PortfolioView[] = ['home', 'about', 'work', 'education', 'blog', 'meet', 'chat'];
+const portfolioViews: PortfolioView[] = ['home', 'about', 'work', 'education', 'meet', 'chat'];
 const ACTIVE_VIEW_STORAGE_KEY = 'portfolio-active-view';
 const SCROLL_STORAGE_PREFIX = 'portfolio-scroll';
 
@@ -64,32 +63,6 @@ interface SimplePortfolioProps {
     other: string[];
   };
 }
-
-const youtubeChannelUrl = 'https://www.youtube.com/@DeeMedia21';
-
-const writingItems = [
-  {
-    title: 'Building AI products with receipts',
-    category: 'Product value',
-    date: '2026',
-    summary: 'I build AI products that make messy work easier to see, prioritize, and act on. The value is simple: fewer blind spots, faster decisions, and software that proves what it can do through real workflows.',
-    visualProject: 'autoyou',
-  },
-  {
-    title: 'Fantasy football, models, and product taste',
-    category: 'YouTube + ML',
-    date: '2026',
-    summary: 'How sports analysis became a useful playground for forecasting, ranking, interface design, and storytelling.',
-    visualProject: 'football-ai',
-  },
-  {
-    title: 'Shipping useful agents without losing control',
-    category: 'Engineering',
-    date: '2026',
-    summary: 'Design patterns for agent workflows with reviews, notifications, ownership boundaries, and clear audit trails.',
-    visualProject: 'engagement-web',
-  },
-];
 
 function videoSrc(project: PortfolioProject) {
   return `/api/portfolio-video/${encodeURIComponent(project.videoFile)}`;
@@ -171,38 +144,6 @@ function HeroPhotoFrame({
         height={height}
         className={`h-auto w-full rounded-[17px] object-cover transition duration-500 group-hover:brightness-105 ${imageClassName}`}
         sizes="220px"
-      />
-    </div>
-  );
-}
-
-function BlogVisual({ project, className = '' }: { project: PortfolioProject; className?: string }) {
-  const [videoState, setVideoState] = useState<'loading' | 'ready' | 'error'>('loading');
-
-  return (
-    <div className={`relative min-h-[320px] bg-zinc-950 md:h-full md:min-h-[430px] ${className}`}>
-      {videoState !== 'ready' && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-[radial-gradient(circle_at_50%_20%,rgba(14,165,233,0.24),rgba(244,244,245,0.96)_54%)]">
-          <div className="grid justify-items-center gap-3 text-center">
-            <div className="h-9 w-9 animate-spin rounded-full border-2 border-sky-200 border-t-sky-700" />
-            <div className="text-sm font-semibold text-zinc-600">
-              {videoState === 'error' ? 'Video is still loading. Try refreshing if it stays here.' : `Loading ${project.title}`}
-            </div>
-          </div>
-        </div>
-      )}
-      <video
-        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${videoState === 'ready' ? 'opacity-100' : 'opacity-0'}`}
-        src={videoSrc(project)}
-        preload="auto"
-        autoPlay
-        loop
-        playsInline
-        muted
-        controls={false}
-        onCanPlay={() => setVideoState('ready')}
-        onLoadedData={() => setVideoState('ready')}
-        onError={() => setVideoState('error')}
       />
     </div>
   );
@@ -489,9 +430,6 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
             <button type="button" onClick={() => switchView('education')} className={navPillClass('education', 'hidden lg:inline-flex')}>
               <GraduationCap size={18} /> Education
             </button>
-            <button type="button" onClick={() => switchView('blog')} className={navPillClass('blog', 'hidden md:inline-flex')}>
-              <BookOpen size={17} /> Blog
-            </button>
             <button type="button" onClick={() => switchView('meet')} className={navPillClass('meet', 'hidden md:inline-flex')}>
               <CalendarDays size={17} /> Meet
             </button>
@@ -758,83 +696,6 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
         </section>
         <BackToTopButton targetId="education" />
           </>
-        )}
-
-        {activeSection === 'blog' && (
-          <div className="animate-fadeIn">
-            {writingItems.map((item, index) => {
-              const project = projects.find((candidate) => candidate.slug === item.visualProject) ?? heroProject;
-              const nextId = index < writingItems.length - 1 ? `blog-${index + 1}` : 'blog-youtube';
-
-              return (
-                <section key={item.title} id={index === 0 ? 'blog' : `blog-${index}`} className="grid min-h-[calc(100vh-120px)] scroll-mt-0 content-center py-8">
-                  <div className="mx-auto grid w-full max-w-6xl gap-8">
-                    <div className="max-w-4xl">
-                      <div className="text-sm font-semibold uppercase tracking-[0.22em] text-sky-700">{item.category}</div>
-                      <h2 className="mt-4 text-4xl font-semibold tracking-tight text-zinc-950 md:text-6xl">
-                        {index === 0 ? 'Writing about AI, software, and sports...' : item.title}
-                      </h2>
-                    </div>
-
-                    <article className="grid overflow-hidden rounded-[30px] border border-zinc-200 bg-white/78 shadow-[0_30px_90px_rgba(14,116,144,0.10)] md:grid-cols-[0.92fr_1fr]">
-                      <BlogVisual project={project} />
-                      <div className="flex min-h-[300px] flex-col justify-center p-6 md:p-10">
-                        <div className="flex flex-wrap items-center gap-4 text-sm font-semibold text-zinc-500 md:text-base">
-                          <Image src="/profile.jpg" alt="" width={36} height={36} className="h-9 w-9 rounded-full object-cover" />
-                          <span>Dixon Zor</span>
-                          <span>{item.date}</span>
-                        </div>
-                        <h3 className="mt-5 text-3xl font-semibold leading-tight tracking-tight text-zinc-950 md:text-4xl">
-                          {item.title}
-                        </h3>
-                        <p className="mt-4 text-lg font-semibold text-zinc-500 md:text-xl">{item.category}</p>
-                        <p className="mt-4 max-w-xl text-base font-medium leading-7 text-zinc-600 md:text-lg">{item.summary}</p>
-                      </div>
-                    </article>
-
-                    <div className="flex justify-center">
-                      <button
-                        type="button"
-                        onClick={() => document.getElementById(nextId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-                        className="inline-flex items-center gap-3 rounded-full border border-zinc-200 bg-white/80 px-6 py-3 text-base font-semibold text-zinc-900 shadow-[0_16px_44px_rgba(14,116,144,0.12)] backdrop-blur transition hover:-translate-y-0.5 hover:border-sky-200"
-                      >
-                        {index < writingItems.length - 1 ? `Next: ${writingItems[index + 1].title}` : 'Next: DeeTalk channel'}
-                        <ChevronsDown size={18} />
-                      </button>
-                    </div>
-                  </div>
-                </section>
-              );
-            })}
-
-            <section id="blog-youtube" className="grid min-h-[calc(100vh-120px)] scroll-mt-0 content-center py-8">
-              <div className="mx-auto grid w-full max-w-6xl gap-8">
-                <div className="max-w-4xl">
-                  <div className="text-sm font-semibold uppercase tracking-[0.22em] text-red-700">YouTube channel</div>
-                  <h2 className="mt-4 text-4xl font-semibold tracking-tight text-zinc-950 md:text-6xl">DeeTalk</h2>
-                </div>
-
-                <a href={youtubeChannelUrl} target="_blank" rel="noreferrer" className="group grid overflow-hidden rounded-[30px] border border-zinc-200 bg-white/78 p-3 shadow-[0_30px_90px_rgba(14,116,144,0.10)] transition hover:-translate-y-1 md:grid-cols-[1.25fr_0.75fr]">
-                  <div className="relative aspect-[2/1] overflow-hidden rounded-[24px] bg-white md:aspect-[2/1]">
-                    <Image src="/deetalk-channel.png" alt="DeeTalk YouTube channel screenshot" fill className="object-cover object-left-top" sizes="(min-width: 768px) 760px, 100vw" />
-                  </div>
-                  <div className="flex flex-col justify-center p-6 md:p-10">
-                    <div className="inline-flex w-fit items-center gap-2 rounded-full border border-red-100 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700">
-                      YouTube channel
-                    </div>
-                    <h3 className="mt-6 text-4xl font-semibold tracking-tight text-zinc-950">DeeTalk</h3>
-                    <p className="mt-4 max-w-xl text-xl font-medium leading-[1.35] text-zinc-500">
-                      Football, analysis, product thinking, and the public side of my sports AI work.
-                    </p>
-                    <span className="mt-7 inline-flex items-center gap-3 text-xl font-semibold text-sky-700">
-                      Watch on YouTube <ArrowUpRight size={22} />
-                    </span>
-                  </div>
-                </a>
-                <BackToTopButton targetId="blog" />
-              </div>
-            </section>
-          </div>
         )}
 
         {activeSection === 'meet' && (

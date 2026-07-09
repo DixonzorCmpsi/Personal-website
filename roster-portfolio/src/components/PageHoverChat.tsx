@@ -22,7 +22,6 @@ function currentPageContext() {
     { id: "work", label: "Work experience" },
     { id: "education", label: "Education, skills, and resume" },
     { id: "projects", label: "Project recordings and case studies" },
-    { id: "blog", label: "Writing, media, and YouTube" },
     { id: "meet", label: "Meeting scheduler" },
     { id: "chat", label: "Portfolio chat" },
   ];
