@@ -415,7 +415,7 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
           <LocalClock />
         </div>
 
-        <nav className={`fixed left-1/2 top-4 z-50 flex w-[calc(100%-2rem)] max-w-[860px] -translate-x-1/2 items-center justify-center gap-1 overflow-hidden rounded-full border px-2 py-1.5 shadow-[0_12px_35px_rgba(14,116,144,0.16)] backdrop-blur-xl transition-colors duration-500 ${isDark ? 'border-zinc-700 bg-zinc-900/88' : 'border-zinc-200 bg-white/90'}`}>
+        <nav className={`fixed left-1/2 top-4 z-50 flex w-fit max-w-[calc(100%-1rem)] -translate-x-1/2 items-center justify-center gap-1 overflow-x-auto rounded-full border px-1.5 py-1.5 shadow-[0_12px_35px_rgba(14,116,144,0.16)] backdrop-blur-xl transition-colors duration-500 ${isDark ? 'border-zinc-700 bg-zinc-900/88' : 'border-zinc-200 bg-white/90'}`}>
           <button type="button" onClick={() => switchView('home')} className={homePillClass} aria-label="Home">
             <Home size={19} />
           </button>
