@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { Bot, Loader2, MessageCircle, Send, ShieldCheck, X } from "lucide-react";
 import { API_CHAT_ENDPOINT } from "@/config/api";
-import { CHAT_LIMIT, CHAT_USAGE_EVENT, publishRemainingTurns, readStoredRemaining } from "@/lib/chatUsage";
+import { CHAT_LIMIT, CHAT_USAGE_EVENT, chatRequestHeaders, publishRemainingTurns, readStoredRemaining } from "@/lib/chatUsage";
 import {
   appendChatMessage,
   PortfolioChatMessage,
@@ -124,7 +124,7 @@ export default function PageHoverChat() {
     try {
       const response = await fetch(API_CHAT_ENDPOINT, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: chatRequestHeaders(),
         body: JSON.stringify({
           message: trimmedQuestion,
           pageContext: currentPageContext(),

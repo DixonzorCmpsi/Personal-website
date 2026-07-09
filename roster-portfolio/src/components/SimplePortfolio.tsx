@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ArrowUp,
   ArrowUpRight,
@@ -48,6 +48,10 @@ type Education = {
 
 type PortfolioView = 'home' | 'about' | 'work' | 'education' | 'blog' | 'meet' | 'chat';
 
+const portfolioViews: PortfolioView[] = ['home', 'about', 'work', 'education', 'blog', 'meet', 'chat'];
+const ACTIVE_VIEW_STORAGE_KEY = 'portfolio-active-view';
+const SCROLL_STORAGE_PREFIX = 'portfolio-scroll';
+
 interface SimplePortfolioProps {
   projects: PortfolioProject[];
   aboutText: string;
@@ -89,6 +93,24 @@ const writingItems = [
 
 function videoSrc(project: PortfolioProject) {
   return `/api/portfolio-video/${encodeURIComponent(project.videoFile)}`;
+}
+
+function isPortfolioView(value: string | null): value is PortfolioView {
+  return Boolean(value && portfolioViews.includes(value as PortfolioView));
+}
+
+function initialPortfolioView(): PortfolioView {
+  if (typeof window === 'undefined') return 'home';
+
+  const hashView = window.location.hash.replace('#', '');
+  if (isPortfolioView(hashView)) return hashView;
+
+  const storedView = window.localStorage.getItem(ACTIVE_VIEW_STORAGE_KEY);
+  return isPortfolioView(storedView) ? storedView : 'home';
+}
+
+function scrollStorageKey(view: PortfolioView) {
+  return `${SCROLL_STORAGE_PREFIX}:${view}`;
 }
 
 function scrollProjectIntoView(projectId: string) {
@@ -290,20 +312,83 @@ function BackToTopButton({ targetId, label = 'Back to top' }: { targetId: string
 
 export default function SimplePortfolio({ projects, aboutText, experiences, education, skills }: SimplePortfolioProps) {
   const heroProject = projects.find((project) => project.slug === featuredProject.slug) ?? projects[0];
-  const [activeSection, setActiveSection] = useState<PortfolioView>('home');
+  const [activeSection, setActiveSection] = useState<PortfolioView>(() => initialPortfolioView());
   const [isDark, setIsDark] = useState(() => {
     if (typeof window === 'undefined') return false;
     return window.localStorage.getItem('portfolio-theme') === 'dark';
   });
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [activeSection]);
+  const restoredInitialPosition = useRef(false);
+  const scrollToTopOnViewChange = useRef(false);
 
   useEffect(() => {
     document.documentElement.dataset.portfolioTheme = isDark ? 'dark' : 'light';
     window.localStorage.setItem('portfolio-theme', isDark ? 'dark' : 'light');
   }, [isDark]);
+
+  useEffect(() => {
+    window.history.scrollRestoration = 'manual';
+  }, []);
+
+  useEffect(() => {
+    const hash = activeSection === 'home' ? window.location.pathname : `#${activeSection}`;
+    window.localStorage.setItem(ACTIVE_VIEW_STORAGE_KEY, activeSection);
+    window.history.replaceState(null, '', hash);
+
+    if (scrollToTopOnViewChange.current) {
+      scrollToTopOnViewChange.current = false;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (!restoredInitialPosition.current) {
+      restoredInitialPosition.current = true;
+      const savedTop = Number(window.localStorage.getItem(scrollStorageKey(activeSection)) || 0);
+      window.requestAnimationFrame(() => {
+        window.scrollTo({ top: Number.isFinite(savedTop) ? savedTop : 0, behavior: 'auto' });
+      });
+    }
+  }, [activeSection]);
+
+  useEffect(() => {
+    const saveScrollPosition = () => {
+      window.localStorage.setItem(scrollStorageKey(activeSection), String(Math.max(0, Math.round(window.scrollY))));
+    };
+
+    let frame = 0;
+    const scheduleSave = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        saveScrollPosition();
+      });
+    };
+
+    window.addEventListener('scroll', scheduleSave, { passive: true });
+    window.addEventListener('beforeunload', saveScrollPosition);
+
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', scheduleSave);
+      window.removeEventListener('beforeunload', saveScrollPosition);
+      saveScrollPosition();
+    };
+  }, [activeSection]);
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const nextView = window.location.hash.replace('#', '');
+      if (isPortfolioView(nextView)) {
+        scrollToTopOnViewChange.current = false;
+        setActiveSection(nextView);
+      } else {
+        scrollToTopOnViewChange.current = false;
+        setActiveSection('home');
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   useEffect(() => {
     projects.forEach((project) => {
@@ -316,8 +401,12 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
   }, [projects]);
 
   const switchView = (section: PortfolioView) => {
+    if (section === activeSection) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    scrollToTopOnViewChange.current = true;
     setActiveSection(section);
-    window.history.replaceState(null, '', section === 'home' ? window.location.pathname : `#${section}`);
   };
 
   const scrollToProjects = () => {

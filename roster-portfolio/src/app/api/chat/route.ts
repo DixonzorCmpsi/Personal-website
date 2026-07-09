@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { buildPortfolioChatContext } from "@/lib/portfolioChatContext";
 
-const WINDOW_SECONDS = 60 * 60;
+const WINDOW_SECONDS = 24 * 60 * 60;
 const MAX_TURNS = 10;
 const localBuckets = new Map<string, { count: number; resetAt: number }>();
 
@@ -18,8 +18,11 @@ function clientKey(request: NextRequest) {
     forwardedFor ||
     "unknown-ip";
   const userAgent = request.headers.get("user-agent") || "unknown-agent";
+  const browserSession = (request.headers.get("x-portfolio-chat-session") || "")
+    .replace(/[^a-zA-Z0-9:_-]/g, "")
+    .slice(0, 120);
 
-  return crypto.createHash("sha256").update(`${ip}:${userAgent}`).digest("hex");
+  return crypto.createHash("sha256").update(`${ip}:${userAgent}:${browserSession || "no-browser-id"}`).digest("hex");
 }
 
 async function redisCommand(args: Array<string | number>) {
@@ -102,10 +105,11 @@ function rateLimitHeaders(limit: Awaited<ReturnType<typeof checkRateLimit>>) {
 }
 
 function directModelConfig() {
-  if (process.env.OLLAMA_CLOUD_API_KEY) {
+  const ollamaKey = process.env.OLLAMA_CLOUD_API_KEY || process.env.OLLAMA_API_KEY;
+  if (ollamaKey) {
     return {
-      apiKey: process.env.OLLAMA_CLOUD_API_KEY,
-      baseUrl: process.env.OLLAMA_CLOUD_URL || "https://ollama.com",
+      apiKey: ollamaKey,
+      baseUrl: process.env.OLLAMA_CLOUD_URL || process.env.OLLAMA_HOST || "https://ollama.com",
       model: process.env.OLLAMA_CLOUD_MODEL || process.env.OLLAMA_MODEL || "gpt-oss:120b",
       label: "ollama-cloud",
     };
@@ -126,8 +130,10 @@ function directModelConfig() {
 async function callDirectModel(message: string, systemPrompt: string) {
   const config = directModelConfig();
   if (!config) return null;
+  const baseUrl = config.baseUrl.replace(/\/$/, "");
+  const completionsUrl = baseUrl.endsWith("/v1") ? `${baseUrl}/chat/completions` : `${baseUrl}/v1/chat/completions`;
 
-  const response = await fetch(`${config.baseUrl.replace(/\/$/, "")}/v1/chat/completions`, {
+  const response = await fetch(completionsUrl, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${config.apiKey}`,
@@ -210,8 +216,8 @@ export async function POST(request: NextRequest) {
   if (!limit.allowed) {
     return NextResponse.json(
       {
-        error: "Hourly question limit reached.",
-        response: `You have used the 10-question hourly limit. Try again in ${Math.ceil(limit.resetSeconds / 60)} minute(s).`,
+        error: "Daily question limit reached.",
+        response: `You have used the 10-question daily limit. Try again in ${Math.ceil(limit.resetSeconds / 3600)} hour(s).`,
         resetSeconds: limit.resetSeconds,
       },
       {
@@ -226,13 +232,19 @@ export async function POST(request: NextRequest) {
 
   const systemPrompt = buildPortfolioChatContext(pageContext, conversationContext);
 
+  const hasDirectModel = Boolean(directModelConfig());
+
   try {
-    const directPayload = await callDirectModel(message, systemPrompt);
+    const directPayload = hasDirectModel ? await callDirectModel(message, systemPrompt) : null;
     if (directPayload) {
       return NextResponse.json(directPayload, { headers: rateLimitHeaders(limit) });
     }
   } catch (error) {
     console.error("[Chat API] Direct model failed:", error);
+    return NextResponse.json(
+      { response: "The live model is connected, but it returned an error. Please try again in a moment." },
+      { status: 502, headers: rateLimitHeaders(limit) }
+    );
   }
 
   try {

@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Loader2, Plus, Send, ShieldCheck } from 'lucide-react';
 import { API_CHAT_ENDPOINT } from '@/config/api';
-import { CHAT_LIMIT, CHAT_USAGE_EVENT, publishRemainingTurns, readStoredRemaining } from '@/lib/chatUsage';
+import { CHAT_LIMIT, CHAT_USAGE_EVENT, chatRequestHeaders, publishRemainingTurns, readStoredRemaining } from '@/lib/chatUsage';
 import {
     appendChatMessage,
     PortfolioChatMessage,
@@ -91,7 +91,7 @@ export default function GlobalChat() {
         try {
             const res = await fetch(API_CHAT_ENDPOINT, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: chatRequestHeaders(),
                 body: JSON.stringify({
                     message: trimmedQuestion,
                     conversationContext,
@@ -204,7 +204,7 @@ export default function GlobalChat() {
 
                 <div className="mt-4 flex items-center justify-center gap-2 text-xs font-semibold text-zinc-500">
                     <ShieldCheck size={14} className="text-emerald-600" />
-                    {remainingTurns}/{CHAT_LIMIT} questions left this hour
+                    {remainingTurns}/{CHAT_LIMIT} questions left today
                 </div>
             </div>
         </div>
