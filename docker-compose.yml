@@ -10,9 +10,11 @@ services:
       - NODE_ENV=production
       - NEXT_PUBLIC_API_URL=http://backend:8000
       - REVALIDATE_TOKEN=refresh-portfolio-secret
+      - PORTFOLIO_VIDEO_DIR=/app/portfolio-videos
     env_file:
       - .env.local
     volumes:
+      - ./portfolio-videos:/app/portfolio-videos:ro
       # Mount project folders for media files
       - ./Football AI:/app/Football AI:ro
       - ./LLM Chatbot:/app/LLM Chatbot:ro
