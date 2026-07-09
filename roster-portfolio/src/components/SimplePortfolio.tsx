@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ArrowUp,
   ArrowUpRight,
@@ -111,19 +111,6 @@ function initialPortfolioView(): PortfolioView {
 
 function scrollStorageKey(view: PortfolioView) {
   return `${SCROLL_STORAGE_PREFIX}:${view}`;
-}
-
-function subscribeHydration(onStoreChange: () => void) {
-  const frame = window.requestAnimationFrame(onStoreChange);
-  return () => window.cancelAnimationFrame(frame);
-}
-
-function clientHydrationSnapshot() {
-  return true;
-}
-
-function serverHydrationSnapshot() {
-  return false;
 }
 
 function PortfolioSkeleton() {
@@ -348,27 +335,34 @@ function BackToTopButton({ targetId, label = 'Back to top' }: { targetId: string
 
 export default function SimplePortfolio({ projects, aboutText, experiences, education, skills }: SimplePortfolioProps) {
   const heroProject = projects.find((project) => project.slug === featuredProject.slug) ?? projects[0];
-  const isHydrated = useSyncExternalStore(subscribeHydration, clientHydrationSnapshot, serverHydrationSnapshot);
-  const [activeSection, setActiveSection] = useState<PortfolioView>(() => initialPortfolioView());
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return window.localStorage.getItem('portfolio-theme') === 'dark';
-  });
+  const [activeSection, setActiveSection] = useState<PortfolioView>('home');
+  const [isDark, setIsDark] = useState(false);
+  const [isRestoringView, setIsRestoringView] = useState(true);
   const restoredInitialPosition = useRef(false);
   const scrollToTopOnViewChange = useRef(false);
 
   useEffect(() => {
     window.history.scrollRestoration = 'manual';
+
+    const frame = window.requestAnimationFrame(() => {
+      const restoredThemeIsDark = window.localStorage.getItem('portfolio-theme') === 'dark';
+      setActiveSection(initialPortfolioView());
+      setIsDark(restoredThemeIsDark);
+      document.documentElement.dataset.portfolioTheme = restoredThemeIsDark ? 'dark' : 'light';
+      setIsRestoringView(false);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   useEffect(() => {
-    if (!isHydrated) return;
+    if (isRestoringView) return;
     document.documentElement.dataset.portfolioTheme = isDark ? 'dark' : 'light';
     window.localStorage.setItem('portfolio-theme', isDark ? 'dark' : 'light');
-  }, [isDark, isHydrated]);
+  }, [isDark, isRestoringView]);
 
   useEffect(() => {
-    if (!isHydrated) return;
+    if (isRestoringView) return;
 
     const hash = activeSection === 'home' ? window.location.pathname : `#${activeSection}`;
     window.localStorage.setItem(ACTIVE_VIEW_STORAGE_KEY, activeSection);
@@ -387,10 +381,10 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
         window.scrollTo({ top: Number.isFinite(savedTop) ? savedTop : 0, behavior: 'auto' });
       });
     }
-  }, [activeSection, isHydrated]);
+  }, [activeSection, isRestoringView]);
 
   useEffect(() => {
-    if (!isHydrated) return;
+    if (isRestoringView) return;
 
     const saveScrollPosition = () => {
       window.localStorage.setItem(scrollStorageKey(activeSection), String(Math.max(0, Math.round(window.scrollY))));
@@ -414,7 +408,7 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
       window.removeEventListener('beforeunload', saveScrollPosition);
       saveScrollPosition();
     };
-  }, [activeSection, isHydrated]);
+  }, [activeSection, isRestoringView]);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -442,7 +436,7 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
     });
   }, [projects]);
 
-  if (!isHydrated) {
+  if (isRestoringView) {
     return <PortfolioSkeleton />;
   }
 
