@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import {
   ArrowUp,
   ArrowUpRight,
@@ -111,6 +111,42 @@ function initialPortfolioView(): PortfolioView {
 
 function scrollStorageKey(view: PortfolioView) {
   return `${SCROLL_STORAGE_PREFIX}:${view}`;
+}
+
+function subscribeHydration(onStoreChange: () => void) {
+  const frame = window.requestAnimationFrame(onStoreChange);
+  return () => window.cancelAnimationFrame(frame);
+}
+
+function clientHydrationSnapshot() {
+  return true;
+}
+
+function serverHydrationSnapshot() {
+  return false;
+}
+
+function PortfolioSkeleton() {
+  return (
+    <main className="relative isolate min-h-screen overflow-hidden bg-[#fbfbf8] text-zinc-950">
+      <div className="pointer-events-none fixed inset-0 z-0 bg-[linear-gradient(rgba(125,211,252,0.28)_1px,transparent_1px),linear-gradient(90deg,rgba(125,211,252,0.28)_1px,transparent_1px)] bg-[size:18px_18px]" />
+      <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(ellipse_at_50%_18%,rgba(103,232,249,0.38),rgba(186,230,253,0.18)_30%,transparent_56%),linear-gradient(180deg,rgba(255,255,255,0.2),#fbfbf8_68%)]" />
+      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1440px] flex-col px-4 py-6 md:px-8 lg:px-10">
+        <div className="fixed left-1/2 top-4 z-50 h-[64px] w-[calc(100%-2rem)] max-w-[860px] -translate-x-1/2 animate-pulse rounded-full border border-zinc-200 bg-white/88 shadow-[0_12px_35px_rgba(14,116,144,0.12)] backdrop-blur-xl" />
+        <section className="flex min-h-screen flex-col items-center justify-center pb-16 pt-20 text-center">
+          <div className="h-12 w-72 animate-pulse rounded-full bg-sky-100/90 shadow-[0_18px_48px_rgba(14,165,233,0.16)]" />
+          <div className="mt-12 grid w-full max-w-5xl gap-4">
+            <div className="mx-auto h-20 w-[82%] animate-pulse rounded-3xl bg-white/78 shadow-sm" />
+            <div className="mx-auto h-20 w-[64%] animate-pulse rounded-3xl bg-white/78 shadow-sm" />
+          </div>
+          <div className="mt-10 grid w-full max-w-3xl gap-3">
+            <div className="mx-auto h-8 w-[84%] animate-pulse rounded-full bg-zinc-200/70" />
+            <div className="mx-auto h-8 w-[58%] animate-pulse rounded-full bg-zinc-200/70" />
+          </div>
+        </section>
+      </div>
+    </main>
+  );
 }
 
 function scrollProjectIntoView(projectId: string) {
@@ -312,6 +348,7 @@ function BackToTopButton({ targetId, label = 'Back to top' }: { targetId: string
 
 export default function SimplePortfolio({ projects, aboutText, experiences, education, skills }: SimplePortfolioProps) {
   const heroProject = projects.find((project) => project.slug === featuredProject.slug) ?? projects[0];
+  const isHydrated = useSyncExternalStore(subscribeHydration, clientHydrationSnapshot, serverHydrationSnapshot);
   const [activeSection, setActiveSection] = useState<PortfolioView>(() => initialPortfolioView());
   const [isDark, setIsDark] = useState(() => {
     if (typeof window === 'undefined') return false;
@@ -321,15 +358,18 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
   const scrollToTopOnViewChange = useRef(false);
 
   useEffect(() => {
-    document.documentElement.dataset.portfolioTheme = isDark ? 'dark' : 'light';
-    window.localStorage.setItem('portfolio-theme', isDark ? 'dark' : 'light');
-  }, [isDark]);
-
-  useEffect(() => {
     window.history.scrollRestoration = 'manual';
   }, []);
 
   useEffect(() => {
+    if (!isHydrated) return;
+    document.documentElement.dataset.portfolioTheme = isDark ? 'dark' : 'light';
+    window.localStorage.setItem('portfolio-theme', isDark ? 'dark' : 'light');
+  }, [isDark, isHydrated]);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+
     const hash = activeSection === 'home' ? window.location.pathname : `#${activeSection}`;
     window.localStorage.setItem(ACTIVE_VIEW_STORAGE_KEY, activeSection);
     window.history.replaceState(null, '', hash);
@@ -347,9 +387,11 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
         window.scrollTo({ top: Number.isFinite(savedTop) ? savedTop : 0, behavior: 'auto' });
       });
     }
-  }, [activeSection]);
+  }, [activeSection, isHydrated]);
 
   useEffect(() => {
+    if (!isHydrated) return;
+
     const saveScrollPosition = () => {
       window.localStorage.setItem(scrollStorageKey(activeSection), String(Math.max(0, Math.round(window.scrollY))));
     };
@@ -372,7 +414,7 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
       window.removeEventListener('beforeunload', saveScrollPosition);
       saveScrollPosition();
     };
-  }, [activeSection]);
+  }, [activeSection, isHydrated]);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -399,6 +441,10 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
       document.head.appendChild(link);
     });
   }, [projects]);
+
+  if (!isHydrated) {
+    return <PortfolioSkeleton />;
+  }
 
   const switchView = (section: PortfolioView) => {
     if (section === activeSection) {
