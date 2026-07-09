@@ -561,7 +561,7 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
             <span className="hidden sm:block">AI, automation, and data intelligence.</span>
           </h1>
           <p className="relative z-10 mt-7 w-full max-w-[330px] text-balance text-xl font-medium leading-[1.3] text-zinc-500 sm:max-w-3xl sm:text-2xl md:max-w-4xl md:text-3xl">
-            Building practical AI systems, workflow tools, and ML products that turn messy operational work into useful software.
+            I build practical AI systems, workflow tools, and ML products that turn messy operational work into useful software.
           </p>
           <button type="button" onClick={scrollToProjects} className="relative z-10 mt-12 inline-flex items-center gap-4 rounded-full border border-zinc-200 bg-white/70 px-7 py-3 text-lg font-medium text-zinc-900 shadow-sm backdrop-blur transition hover:-translate-y-0.5">
             View projects
