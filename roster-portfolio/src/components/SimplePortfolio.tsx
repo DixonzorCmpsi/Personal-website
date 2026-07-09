@@ -395,10 +395,10 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
   };
 
   const navPillClass = (section: Exclude<PortfolioView, 'home'>, display = 'inline-flex') =>
-    `${display} items-center gap-1.5 rounded-full px-3 py-2.5 transition hover:bg-zinc-100 hover:text-zinc-950 md:px-3.5 ${
+    `${display} items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-2 text-sm transition hover:bg-zinc-100 hover:text-zinc-950 lg:px-3 lg:py-2.5 lg:text-base ${
       activeSection === section ? 'bg-zinc-100 text-zinc-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]' : ''
     }`;
-  const homePillClass = `inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-zinc-950 transition hover:bg-zinc-100 ${
+  const homePillClass = `inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-zinc-950 transition hover:bg-zinc-100 lg:h-10 lg:w-10 ${
     activeSection === 'home' ? 'bg-zinc-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]' : ''
   }`;
 
@@ -410,17 +410,17 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
       <div className={`hero-pulse-band pointer-events-none fixed left-1/2 z-[2] h-72 w-[76vw] -translate-x-1/2 ${activeSection === 'home' ? 'top-[92px]' : 'top-[72px]'}`} />
       <div className={`hero-blue-sweep pointer-events-none fixed left-1/2 z-[2] h-56 w-[82vw] -translate-x-1/2 ${activeSection === 'home' ? 'top-[136px]' : 'top-[112px]'}`} />
       <div className={`relative z-10 mx-auto flex w-full flex-col ${activeSection === 'chat' ? 'max-w-none gap-0 px-0 py-0' : activeSection === 'home' ? 'max-w-[1440px] gap-10 px-4 py-6 md:px-8 lg:px-10' : 'max-w-[1440px] gap-6 px-4 py-6 md:px-8 lg:px-10'}`}>
-        <div className={`relative z-20 hidden items-center justify-between pt-2 text-xl font-semibold tracking-tight lg:flex ${isDark ? 'text-zinc-50' : 'text-zinc-950'} ${activeSection === 'chat' ? 'lg:hidden' : ''}`}>
+        <div className={`relative z-20 hidden items-center justify-between pt-2 text-xl font-semibold tracking-tight 2xl:flex ${isDark ? 'text-zinc-50' : 'text-zinc-950'} ${activeSection === 'chat' ? '2xl:hidden' : ''}`}>
           <span>State College, PA</span>
           <LocalClock />
         </div>
 
-        <nav className={`fixed left-1/2 top-4 z-50 flex w-fit max-w-[calc(100%-1rem)] -translate-x-1/2 items-center justify-center gap-1 overflow-x-auto rounded-full border px-1.5 py-1.5 shadow-[0_12px_35px_rgba(14,116,144,0.16)] backdrop-blur-xl transition-colors duration-500 ${isDark ? 'border-zinc-700 bg-zinc-900/88' : 'border-zinc-200 bg-white/90'}`}>
+        <nav className={`fixed left-1/2 top-4 z-50 flex w-fit max-w-[calc(100%-1rem)] -translate-x-1/2 items-center justify-center gap-0.5 overflow-hidden rounded-full border px-1 py-1.5 shadow-[0_12px_35px_rgba(14,116,144,0.16)] backdrop-blur-xl transition-colors duration-500 ${isDark ? 'border-zinc-700 bg-zinc-900/88' : 'border-zinc-200 bg-white/90'}`}>
           <button type="button" onClick={() => switchView('home')} className={homePillClass} aria-label="Home">
             <Home size={19} />
           </button>
-          <span className="mx-0.5 hidden h-8 w-px bg-zinc-200 sm:inline-block" aria-hidden="true" />
-          <div className="flex items-center gap-0.5 text-sm font-semibold text-zinc-700 md:text-base">
+          <span className="mx-0.5 hidden h-7 w-px bg-zinc-200 sm:inline-block lg:h-8" aria-hidden="true" />
+          <div className="flex items-center gap-0 text-sm font-semibold text-zinc-700 lg:text-base">
             <button type="button" onClick={() => switchView('about')} className={navPillClass('about')}>
               <UserCircle size={18} /> About
             </button>
@@ -437,14 +437,14 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
               <MessageCircle size={17} /> Ask me
             </button>
           </div>
-          <div className="hidden items-center gap-0.5 border-l border-zinc-200 pl-1.5 sm:flex">
-            <button type="button" className="inline-flex h-9 w-9 items-center justify-center rounded-full text-zinc-700 transition hover:bg-zinc-100" onClick={() => setIsDark((value) => !value)} aria-label="Toggle theme">
+          <div className="hidden items-center gap-0 border-l border-zinc-200 pl-1 sm:flex">
+            <button type="button" className="inline-flex h-8 w-8 items-center justify-center rounded-full text-zinc-700 transition hover:bg-zinc-100 lg:h-9 lg:w-9" onClick={() => setIsDark((value) => !value)} aria-label="Toggle theme">
               {isDark ? <Sun size={18} /> : <Moon size={18} />}
             </button>
-            <a className="hidden h-9 w-9 items-center justify-center rounded-full text-zinc-700 transition hover:bg-zinc-100 sm:inline-flex" href="https://linkedin.com/in/dixon-zor" target="_blank" rel="noreferrer" aria-label="LinkedIn">
+            <a className="hidden h-8 w-8 items-center justify-center rounded-full text-zinc-700 transition hover:bg-zinc-100 sm:inline-flex lg:h-9 lg:w-9" href="https://linkedin.com/in/dixon-zor" target="_blank" rel="noreferrer" aria-label="LinkedIn">
               <Linkedin size={15} />
             </a>
-            <a className="inline-flex h-9 w-9 items-center justify-center rounded-full text-zinc-700 transition hover:bg-zinc-100" href="https://github.com/DixonzorCmpsi" target="_blank" rel="noreferrer" aria-label="GitHub">
+            <a className="inline-flex h-8 w-8 items-center justify-center rounded-full text-zinc-700 transition hover:bg-zinc-100 lg:h-9 lg:w-9" href="https://github.com/DixonzorCmpsi" target="_blank" rel="noreferrer" aria-label="GitHub">
               <Github size={15} />
             </a>
           </div>
@@ -487,12 +487,14 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
             <span className="mx-4 h-6 w-px bg-sky-300/90" />
             <span className="font-medium text-sky-700">Featured work</span>
           </button>
-          <h1 className={`relative z-10 mt-10 w-full max-w-[330px] text-[44px] font-semibold leading-[0.98] tracking-tight sm:max-w-3xl sm:text-6xl md:max-w-5xl md:text-7xl lg:max-w-[1320px] lg:text-[84px] xl:text-[90px] ${isDark ? 'text-zinc-50' : 'text-zinc-950'}`}>
+          <h1 className={`relative z-10 mt-10 w-full max-w-[330px] text-[44px] font-semibold leading-[0.98] tracking-tight sm:max-w-3xl sm:text-6xl md:max-w-5xl md:text-7xl lg:max-w-[1320px] lg:text-[76px] xl:text-[90px] ${isDark ? 'text-zinc-50' : 'text-zinc-950'}`}>
             <span className="block sm:hidden">Ai,</span>
             <span className="block sm:hidden">Automation,</span>
             <span className="block sm:hidden">and Data</span>
             <span className="block sm:hidden">Intelligence.</span>
-            <span className="hidden sm:block">Ai, Automation, and Data Intelligence.</span>
+            <span className="hidden sm:block xl:hidden">Ai, Automation, and Data</span>
+            <span className="hidden sm:block xl:hidden">Intelligence.</span>
+            <span className="hidden xl:block">Ai, Automation, and Data Intelligence.</span>
           </h1>
           <p className="relative z-10 mt-7 w-full max-w-[330px] text-balance text-xl font-medium leading-[1.3] text-zinc-500 sm:max-w-3xl sm:text-2xl md:max-w-4xl md:text-3xl">
             I build practical AI systems, workflow tools, and ML products that turn messy operational work into useful software.
