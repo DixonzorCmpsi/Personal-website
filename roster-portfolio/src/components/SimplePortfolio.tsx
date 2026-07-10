@@ -230,6 +230,10 @@ function ProjectCard({
     <article id={projectId} className="grid min-h-screen scroll-mt-0 content-start gap-5 pb-20 pt-20 md:gap-5 md:pb-24 md:pt-24">
       <ProjectVideo project={project} />
 
+      <p className="mx-auto w-full max-w-[1480px] px-2 text-sm font-semibold uppercase tracking-[0.18em] text-zinc-500 md:px-1">
+        Demo note: all data shown in this video is mock data, used only to display the functionality of software I built.
+      </p>
+
       <div className="mx-auto grid w-full max-w-[1480px] grid-cols-4 gap-2 px-1 md:gap-3">
         {Array.from({ length: 4 }).map((_, itemIndex) => (
           <div key={itemIndex} className={`h-1 rounded-full ${itemIndex === index % 4 ? 'bg-zinc-950' : 'bg-zinc-200'}`} />
@@ -405,7 +409,7 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
   };
 
   const navPillClass = (section: Exclude<PortfolioView, 'home'>, display = 'inline-flex') =>
-    `${display} items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-2 text-sm transition hover:bg-zinc-100 hover:text-zinc-950 lg:px-3 lg:py-2.5 lg:text-base ${
+    `${display} items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-2 text-sm transition hover:bg-zinc-100 hover:text-zinc-950 sm:px-2.5 lg:px-3 lg:py-2.5 lg:text-base ${
       activeSection === section ? 'bg-zinc-100 text-zinc-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]' : ''
     }`;
   const homePillClass = `inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-zinc-950 transition hover:bg-zinc-100 lg:h-10 lg:w-10 ${
@@ -440,7 +444,7 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
             <button type="button" onClick={() => switchView('education')} className={navPillClass('education', 'hidden lg:inline-flex')}>
               <GraduationCap size={18} /> Education
             </button>
-            <button type="button" onClick={() => switchView('meet')} className={navPillClass('meet', 'hidden md:inline-flex')}>
+            <button type="button" onClick={() => switchView('meet')} className={navPillClass('meet')}>
               <CalendarDays size={17} /> Meet
             </button>
             <button type="button" onClick={() => switchView('chat')} className={navPillClass('chat', 'hidden sm:inline-flex')}>
@@ -492,12 +496,7 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
             height={512}
             className="left-4 top-[470px] z-0 w-44 rotate-3 hover:-translate-y-2 hover:translate-x-1 2xl:left-0 2xl:top-[560px] 2xl:w-52"
           />
-          <button type="button" onClick={() => switchView('work')} className="hero-pill-glint relative z-10 inline-flex items-center overflow-hidden rounded-full border border-sky-300/90 bg-white/82 px-5 py-3 text-base font-semibold text-sky-950 shadow-[0_18px_48px_rgba(14,165,233,0.24),inset_0_0_0_1px_rgba(255,255,255,0.74),inset_0_-18px_36px_rgba(186,230,253,0.46)] backdrop-blur-xl transition hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-sky-200">
-            <span>Dixon Zor</span>
-            <span className="mx-4 h-6 w-px bg-sky-300/90" />
-            <span className="font-medium text-sky-700">Featured work</span>
-          </button>
-          <h1 className={`relative z-10 mt-10 w-full max-w-[330px] text-[44px] font-semibold leading-[0.98] tracking-tight sm:max-w-3xl sm:text-6xl md:max-w-5xl md:text-7xl lg:max-w-[1320px] lg:text-[76px] xl:text-[90px] ${isDark ? 'text-zinc-50' : 'text-zinc-950'}`}>
+          <h1 className={`relative z-10 w-full max-w-[330px] text-center text-[44px] font-semibold leading-[0.98] tracking-tight sm:max-w-3xl sm:text-6xl md:max-w-5xl md:text-7xl lg:max-w-[1320px] lg:text-[76px] xl:text-[90px] ${isDark ? 'text-zinc-50' : 'text-zinc-950'}`}>
             <span className="block sm:hidden">Ai,</span>
             <span className="block sm:hidden">Automation,</span>
             <span className="block sm:hidden">and Data</span>
@@ -537,7 +536,7 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
 
         {activeSection === 'about' && (
           <>
-        <section id="about" className="animate-fadeIn grid min-h-[calc(100vh-120px)] scroll-mt-0 gap-8 py-4 lg:grid-cols-[0.31fr_1fr] lg:items-center">
+        <section id="about" className="animate-fadeIn grid min-h-[calc(100vh-120px)] scroll-mt-0 gap-8 pb-4 pt-24 sm:pt-28 lg:grid-cols-[0.31fr_1fr] lg:items-center lg:py-4">
           <aside className="hidden lg:flex lg:items-center lg:justify-center">
             <div className="mx-auto w-full max-w-[280px]">
               <Image src="/profile.jpg" alt="Dixon Zor" width={240} height={240} className="mx-auto h-60 w-60 rounded-full border border-zinc-200 object-cover shadow-[0_24px_80px_rgba(14,116,144,0.18)]" priority />
@@ -596,12 +595,9 @@ export default function SimplePortfolio({ projects, aboutText, experiences, educ
 
         {activeSection === 'work' && (
           <>
-        <section id="work" className="animate-fadeIn grid min-h-[calc(100vh-120px)] scroll-mt-0 content-center py-8">
+        <section id="work" className="animate-fadeIn grid min-h-[calc(100vh-120px)] scroll-mt-0 content-start pb-8 pt-24 sm:pt-28 lg:content-center lg:py-8">
           <div className="mx-auto mb-8 max-w-5xl text-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100/70 px-4 py-2 text-sm font-semibold text-sky-900">
-              <Grid2X2 size={16} /> Work
-            </div>
-            <h2 className="mt-5 text-4xl font-semibold tracking-tight text-zinc-950 md:text-6xl">Work Experience</h2>
+            <h2 className="text-4xl font-semibold tracking-tight text-zinc-950 md:text-6xl">Work Experience</h2>
           </div>
           <div className="mx-auto grid w-full max-w-6xl gap-5">
             {experiences.map((experience) => (
