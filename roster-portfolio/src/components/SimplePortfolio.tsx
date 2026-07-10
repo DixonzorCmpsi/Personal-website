@@ -216,6 +216,7 @@ function ProjectCard({
 }) {
   const projectId = `project-${project.slug}`;
   const nextProjectId = nextProjectSlug ? `project-${nextProjectSlug}` : null;
+  const showDemoNote = project.slug !== 'football-ai';
 
   const scrollToNextProject = () => {
     if (nextProjectId) {
@@ -230,9 +231,11 @@ function ProjectCard({
     <article id={projectId} className="grid min-h-screen scroll-mt-0 content-start gap-5 pb-20 pt-20 md:gap-5 md:pb-24 md:pt-24">
       <ProjectVideo project={project} />
 
-      <p className="mx-auto w-full max-w-[1480px] px-2 text-sm font-semibold uppercase tracking-[0.18em] text-zinc-500 md:px-1">
-        Demo note: all data shown in this video is mock data, used only to display the functionality of software I built.
-      </p>
+      {showDemoNote ? (
+        <p className="mx-auto w-full max-w-[1480px] px-2 text-sm font-semibold uppercase tracking-[0.18em] text-zinc-500 md:px-1">
+          Demo note: all data shown in this video is mock data, used only to display the functionality of software I built.
+        </p>
+      ) : null}
 
       <div className="mx-auto grid w-full max-w-[1480px] grid-cols-4 gap-2 px-1 md:gap-3">
         {Array.from({ length: 4 }).map((_, itemIndex) => (
